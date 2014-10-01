@@ -134,24 +134,22 @@ public class DES {
 			StringBuilder asciiTable = new StringBuilder(table);
 			asciiTable.insert(127-ascii, ' ');
 			
-			
-			asciiTable.insert(0, "SOH");
-			asciiTable.insert(0, "NUL");
+			for (int i = 0; i < 32; i++) {
+				asciiTable.insert(0, ' ');
+			}
+			asciiTable.append(' ');
 			
 			table = asciiTable.toString();
 			System.out.println(table);
-			System.out.println(table.charAt(0));
-			
-			
 			
 			int bits = 8;
 			for (int i =0; i < binary.length(); i += bits){
 				int value = Integer.parseInt(binary.substring(i, i + bits), 2);
-				System.out.println("integer value: " + value);
+				//System.out.println("integer value: " + value);
 				System.out.println("binary value: " + binary.substring(i, i + bits));
-				System.out.println("teste: " + (char)value);
-				System.out.println(binary.substring(i, i + bits) + " eq: " + table.charAt(value-ascii));
-				result += table.charAt(value-ascii);
+				//System.out.println("teste: " + (char)value);
+				System.out.println(binary.substring(i, i + bits) + " eq: " + table.charAt(value));
+				result += table.charAt(value);
 			}
 			return result;
 	}
@@ -327,8 +325,8 @@ public class DES {
 		
 		
 		//O cara da net errou o exemplo. Vamos usar esses valores que sao os valores q o vacilao ta usando
-		c[0] = "0111010100011001100010001000";
-		d[0] = "0100000101100101000111011111";
+		//c[0] = "0111010100011001100010001000";
+		//d[0] = "0100000101100101000111011111";
 		
 		System.out.println("c: " + c[0]);
 		System.out.println("d: " + d[0]);
@@ -503,11 +501,12 @@ public class DES {
 	
 	public static void main(String args[]){
 		DES d = new DES();
-		//File file = new File("test-msg.txt");
-		File file = new File("HelloWorld.txt");
+		long n1 = System.currentTimeMillis();
+		File file = new File("test-msg.txt");
+		//File file = new File("HelloWorld.txt");
 		String binary = d.readMsgFromTextFile(file);
 		//MUDA O BINARY PRA FICAR IGUAL AO EXEMPLO
-		binary = "0101011011101001100111101010110011011110010111111111010010110001";
+		//binary = "0101011011101001100111101010110011011110010111111111010010110001";
 		ArrayList<String> blocks = d.breakMsgInBlocks(binary, 64);
 		ArrayList<String> permutedList = d.initialPermutation(blocks);
 		//desKey da animacao. Tudo indica que existem erros no algoritmo de key schedule
@@ -519,7 +518,8 @@ public class DES {
 		keys = d.generateKeys(blocks, desKey);
 		
 		d.processInputData(permutedList);
-		
+		long n2 = System.currentTimeMillis();
+		System.out.println("tempo: " + (n2-n1));
 
 	}
 }
