@@ -400,6 +400,10 @@ public class DES {
 	}
 	
 	public void processInputData(ArrayList<String> permutedList){
+		ArrayList<String> outputBlocks = new ArrayList<String>();
+		ArrayList<String> outputBlocksAscii = new ArrayList<String>();
+		String finalBinaryEncrypted = "";
+		String finalAsciiEncrypted = "";
 		for (String block : permutedList) {
 			//ArrayList<String> sboxResultArray = new ArrayList<String>();
 			String[] firstHalf = new String[16];
@@ -424,7 +428,6 @@ public class DES {
 				//Exclusive-OR E(secondHalf[i-1]) with K[i]
 				String exclusiveResult = exclusiveOr(expandedR, keys.get(i));
 				System.out.println("exclusiveResult: " + exclusiveResult);
-				//Divide the result in blocks of 6 bits
 				ArrayList<String> string6bitsArray = breakMsgInBlocks(exclusiveResult, 6);
 				int box = 0;
 				for (String string6bits : string6bitsArray) {
@@ -432,6 +435,7 @@ public class DES {
 					String stringRow = "" + string6bits.charAt(0)+string6bits.charAt(5);
 					//Convert the binary number to base 10
 					int row = Integer.parseInt(stringRow, 2);
+					//Divide the result in blocks of 6 bits
 					//Calculate which column of the s-box
 					String stringColumn = "" + string6bits.substring(1, 5);
 					int column = Integer.parseInt(stringColumn, 2);
@@ -459,7 +463,23 @@ public class DES {
 			String encryptedString = convertBinaryToString(finalString);
 			System.out.println("encryptedString size: " + encryptedString.length());
 			System.out.println("encryptedString: " + encryptedString);
+			outputBlocks.add(finalString);
+			outputBlocksAscii.add(encryptedString);
+			finalBinaryEncrypted += finalString;
+			finalAsciiEncrypted += encryptedString;
 		}
+		System.out.println("printing encrypted binary strings:");
+		for (String string : outputBlocks) {
+			System.out.println(string);
+		}
+		System.out.println("printing printable ascii strings:");
+		for (String string : outputBlocksAscii) {
+			System.out.println(string);
+		}
+		System.out.println("encrypted text:");
+		System.out.println(finalBinaryEncrypted);
+		System.out.println("encrypted ascii text: ");
+		System.out.println(finalAsciiEncrypted);
 	}
 	
 	public static String finalPermutation(String input){
@@ -498,6 +518,8 @@ public class DES {
 		}
 		return (zeros+result);
 	}
+	
+	//public static String 
 	
 	public static void main(String args[]){
 		DES d = new DES();
