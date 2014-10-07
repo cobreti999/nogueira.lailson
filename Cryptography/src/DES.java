@@ -141,15 +141,10 @@ public class DES {
 			asciiTable.append(' ');
 			
 			table = asciiTable.toString();
-			System.out.println(table);
 			
 			int bits = 8;
 			for (int i =0; i < binary.length(); i += bits){
 				int value = Integer.parseInt(binary.substring(i, i + bits), 2);
-				//System.out.println("integer value: " + value);
-				System.out.println("binary value: " + binary.substring(i, i + bits));
-				//System.out.println("teste: " + (char)value);
-				System.out.println(binary.substring(i, i + bits) + " eq: " + table.charAt(value));
 				result += table.charAt(value);
 			}
 			return result;
@@ -382,10 +377,16 @@ public class DES {
 		return permutedString;
 	}
 	
+	
+	/*
+	 * 
+	 * exclusiveOr(String s1, String s2) performs a XOR operation between two binary string
+	 * 
+	 */
+	
+	
 	public static String exclusiveOr(String s1, String s2){
-		//return Long.toBinaryString((Long.parseLong(s1, 2) ^ Long.parseLong(s2, 2)));
-		System.out.println("s1 size: " + s1.length() + " s1: " + s1);
-		System.out.println("s2 size: " + s2.length() + " s2: " + s2);
+		
 		BigInteger i1 = new BigInteger(s1, 2);
 		BigInteger i2 = new BigInteger(s2, 2);
 		BigInteger res = i1.xor(i2);
@@ -398,87 +399,96 @@ public class DES {
 			zeros += "0";
 		}
 		s3 = zeros+s3;
-		System.out.println("s3 size: " + s3.length() + " s3: " + s3);
 		return (s3);
 	}
 	
 	/*
 	 * 
-	 * 
+	 * processInputData(String text, String operation) is where occurs the processing of the input data.
+	 * It receives a String 'text' as argument and a String 'operation' which indicates if the user
+	 * wants to encrypt or decrypt the text. 
 	 * 
 	 */
 	
-	public static String processInputData(ArrayList<String> permutedList, boolean isDecrypt){
+	public static String processInputData(String text, String operation){
+		//The first step is to divide the text into blocks of 64 bits according to DES specification
+		ArrayList<String> blocks;
+		if (text.length() > 64){
+			blocks = breakMsgInBlocks(text, 64);
+		}else{
+			//If the block is smaller than 64, just paddle the remaining bits to complete 64 bits
+			//and add to the ArrayList
+			String paddledString = paddle(text, 64);
+			blocks = new ArrayList<String>();
+			blocks.add(paddledString);
+		}
+		//Performs an initialPermutation on all blocks of the message
+		ArrayList<String> permutedList = initialPermutation(blocks);
+		
+		
 		ArrayList<String> outputBlocks = new ArrayList<String>();
 		ArrayList<String> outputBlocksAscii = new ArrayList<String>();
 		String finalBinaryEncrypted = "";
 		String finalAsciiEncrypted = "";
+		//Iterate over all blocks
 		for (String block : permutedList) {
-			//ArrayList<String> sboxResultArray = new ArrayList<String>();
 			String[] firstHalf = new String[17];
 			String[] secondHalf = new String[17];
+			//Divide each block into two parts, each one with 32 bits
 			firstHalf[0] = block.substring(0, 32);
 			secondHalf[0] = block.substring(32, 64);
 			String expandedR = "";
-			System.out.println("firstHalf: " + firstHalf[0]);
-			System.out.println("secondHalf: " + secondHalf[0]);
 			//Process the input data for 16 rounds
 			for (int i =0 ; i < 16; i ++){
 				String sboxResult ="";
 				//Expanding secondHalf according to e-bit selection table
-				//O EXEMPLO DO VACILAO DA OUTRO VALOR AQUI
-				System.out.println("i: "+ i + "secondHalf[i] size: " + secondHalf[i].length());
 				expandedR = "" + secondHalf[i].charAt(31) + secondHalf[i].substring(0, 5) 
 						+ secondHalf[i].substring(3, 9) + secondHalf[i].substring(7, 13)
 						+ secondHalf[i].substring(11, 17) + secondHalf[i].substring(15, 21)
 						+ secondHalf[i].substring(19, 25) + secondHalf[i].substring(23, 29)
 						+ secondHalf[i].substring(27, 32) + secondHalf[i].charAt(0);	
-				System.out.println("expandedR[" + i + "]: " + expandedR);
-				//Exclusive-OR E(secondHalf[i-1]) with K[i]
+				//Exclusive-OR E(secondHalf[i]) with K[i]
 				String exclusiveResult;
-				if (isDecrypt){
+				if (operation.equalsIgnoreCase("decrypt")){
+					//If the operation is 'decrypt' apply the keys in the inverse order
 					exclusiveResult = exclusiveOr(expandedR, keys.get(15-i));
 				}else{
+					//If the operation is 'encrypt' apply the keys in the normal order
 					exclusiveResult = exclusiveOr(expandedR, keys.get(i));
 				}
-					
-				System.out.println("exclusiveResult: " + exclusiveResult);
+				//Divide the string into blocks of 6 bits
 				ArrayList<String> string6bitsArray = breakMsgInBlocks(exclusiveResult, 6);
 				int box = 0;
 				//iterate over the 8 sbox
 				for (String string6bits : string6bitsArray) {
-					//Calculate which row of the s-box
+					//Calculate which row of the s-box (first and last element of the 6-bit block)
 					String stringRow = "" + string6bits.charAt(0)+string6bits.charAt(5);
 					//Convert the binary number to base 10
 					int row = Integer.parseInt(stringRow, 2);
-					//Divide the result in blocks of 6 bits
-					//Calculate which column of the s-box
+					//Calculate which column of the s-box (the remaining four bits)
 					String stringColumn = "" + string6bits.substring(1, 5);
+					//Convert the binary number to base 10
 					int column = Integer.parseInt(stringColumn, 2);
+					//The result of the Sbox lookup is converted to a 4 bit number. 
+					//The result is concatenated with the sboxResult variable
 					sboxResult += convertStringTo4Bits(Sbox[box++][row][column]);
-					System.out.println("size sboxResult: " + sboxResult.length()  + " sboxResult: " + sboxResult);
 				}
-				//Perform FinalPermutation
+				//Performs another permutation
 				String permutedString = permutationAfterSbox(sboxResult);
-				System.out.println("permutedString size: " + permutedString.length());
-				System.out.println("permutedString: " + permutedString);
 				//Exclusive-OR firstHalf with permutedString
 				String xorResult = exclusiveOr(firstHalf[i], permutedString);
-				System.out.println("xorResult: " + xorResult + " xorResult size: " + xorResult.length());
+				//This test avoids access to invalid positions in the array
 				if (i < 16){
+					//Prepares the initial values for the next iteration 
 					firstHalf[i+1] = secondHalf[i];
 					secondHalf[i+1] = xorResult;
 				}
 			}
 			//Perform FinalPermutation on the string formed by the following 
-			//concatenation "secondhalf[15]firsthalf[15]"
+			//concatenation "secondhalf[16]firsthalf[16]"
 			String lastRoundResult = secondHalf[16]+firstHalf[16];
-			System.out.println("lastRoundResultLength: " + lastRoundResult.length() + " lastRoundResult: " + lastRoundResult);
 			String finalString = finalPermutation(lastRoundResult);
-			System.out.println(finalString.length() + " " + finalString);
 			String encryptedString = convertBinaryToString(finalString);
-			System.out.println("encryptedString size: " + encryptedString.length());
-			System.out.println("encryptedString: " + encryptedString);
 			outputBlocks.add(finalString);
 			outputBlocksAscii.add(encryptedString);
 			finalBinaryEncrypted += finalString;
@@ -494,16 +504,20 @@ public class DES {
 		}
 		System.out.println("encrypted text:");
 		System.out.println(finalBinaryEncrypted);
-		System.out.println("encrypted text bits: " + finalBinaryEncrypted.length());
 		System.out.println("encrypted ascii text: ");
 		System.out.println(finalAsciiEncrypted);
 		return finalBinaryEncrypted;
 	}
 	
+	/*
+	 * 
+	 * finalPermutation(String input) performs the finalPermutation in the block
+	 * 
+	 */
+	
 	public static String finalPermutation(String input){
 		String output = "";
 		int index = 0;
-		//input = "0000010000110100110011000000100101100000101110110000001010001011";
 		for (int i =0; i < 8; i++){
 			output = output + input.charAt(39-index)+input.charAt(7-index)+input.charAt(47-index)+input.charAt(15-index)
 					+ input.charAt(55-index)+input.charAt(23-index)+input.charAt(63-index)+input.charAt(31-index);
@@ -512,7 +526,13 @@ public class DES {
 		return output;
 	}
 	
-	//testada ok
+	/*
+	 * 
+	 * permutationAfterSbox(String input) performs a string permutation after the string
+	 * passed through the s-box phase.
+	 * 
+	 */
+	
 	public static String permutationAfterSbox(String input){
 		String output = "";
 		output = "" + input.charAt(15)+input.charAt(6)+input.charAt(19)+input.charAt(20)
@@ -525,6 +545,13 @@ public class DES {
 				+input.charAt(21)+input.charAt(10)+input.charAt(3)+input.charAt(24);
 		return output;
 	}
+	
+	/*
+	 * 
+	 * convertStringTo4Bits(String s) is a utility method to convert a string and
+	 * make it a 4 bit digit
+	 * 
+	 */
 	
 	private static String convertStringTo4Bits(String s){
 		String result = Integer.toBinaryString(Integer.parseInt(s));
@@ -567,105 +594,6 @@ public class DES {
 
 	}
 	
-	public static String decryptText(String cypherText){
-		
-		
-		
-		
-		
-
-		String originalText ="";
-		//break cypherText in n (64) bit blocks e salva no array list <blocks>
-		ArrayList<String> blocks = breakMsgInBlocks(cypherText, 64);
-		//Perform an initialPermutation in <blocks> and save it at the arrayList: permutedList
-		ArrayList<String> permutedList = initialPermutation(blocks);
-		
-		
-		
-		ArrayList<String> outputBlocks = new ArrayList<String>();
-		ArrayList<String> outputBlocksAscii = new ArrayList<String>();
-		String finalBinaryEncrypted = "";
-		String finalAsciiEncrypted = "";
-		for (String block : permutedList) {
-			//ArrayList<String> sboxResultArray = new ArrayList<String>();
-			String[] firstHalf = new String[17];
-			String[] secondHalf = new String[17];
-			firstHalf[0] = block.substring(0, 32);
-			secondHalf[0] = block.substring(32, 64);
-			String expandedR = "";
-			System.out.println("firstHalf: " + firstHalf[0]);
-			System.out.println("secondHalf: " + secondHalf[0]);
-			//Process the input data for 16 rounds
-			for (int i =0 ; i < 16; i ++){
-				String sboxResult ="";
-				//Expanding secondHalf according to e-bit selection table
-				//O EXEMPLO DO VACILAO DA OUTRO VALOR AQUI
-				System.out.println("i: "+ i + "secondHalf[i] size: " + secondHalf[i].length());
-				expandedR = "" + secondHalf[i].charAt(31) + secondHalf[i].substring(0, 5) 
-						+ secondHalf[i].substring(3, 9) + secondHalf[i].substring(7, 13)
-						+ secondHalf[i].substring(11, 17) + secondHalf[i].substring(15, 21)
-						+ secondHalf[i].substring(19, 25) + secondHalf[i].substring(23, 29)
-						+ secondHalf[i].substring(27, 32) + secondHalf[i].charAt(0);	
-				System.out.println("expandedR[" + i + "]: " + expandedR);
-				//Exclusive-OR E(secondHalf[i-1]) with K[i]
-				String exclusiveResult = exclusiveOr(expandedR, keys.get(15-i));
-				System.out.println("exclusiveResult: " + exclusiveResult);
-				ArrayList<String> string6bitsArray = breakMsgInBlocks(exclusiveResult, 6);
-				int box = 0;
-				//iterate over the 8 sbox
-				for (String string6bits : string6bitsArray) {
-					//Calculate which row of the s-box
-					String stringRow = "" + string6bits.charAt(0)+string6bits.charAt(5);
-					//Convert the binary number to base 10
-					int row = Integer.parseInt(stringRow, 2);
-					//Divide the result in blocks of 6 bits
-					//Calculate which column of the s-box
-					String stringColumn = "" + string6bits.substring(1, 5);
-					int column = Integer.parseInt(stringColumn, 2);
-					sboxResult += convertStringTo4Bits(Sbox[box++][row][column]);
-					System.out.println("size sboxResult: " + sboxResult.length()  + " sboxResult: " + sboxResult);
-				}
-				//Perform FinalPermutation
-				String permutedString = permutationAfterSbox(sboxResult);
-				System.out.println("permutedString size: " + permutedString.length());
-				System.out.println("permutedString: " + permutedString);
-				//Exclusive-OR firstHalf with permutedString
-				String xorResult = exclusiveOr(firstHalf[i], permutedString);
-				System.out.println("xorResult: " + xorResult + " xorResult size: " + xorResult.length());
-				if (i < 16){
-					firstHalf[i+1] = secondHalf[i];
-					secondHalf[i+1] = xorResult;
-				}
-			}
-			//Perform FinalPermutation on the string formed by the following 
-			//concatenation "secondhalf[15]firsthalf[15]"
-			String lastRoundResult = secondHalf[16]+firstHalf[16];
-			System.out.println("lastRoundResultLength: " + lastRoundResult.length() + " lastRoundResult: " + lastRoundResult);
-			String finalString = finalPermutation(lastRoundResult);
-			System.out.println(finalString.length() + " " + finalString);
-			String encryptedString = convertBinaryToString(finalString);
-			System.out.println("encryptedString size: " + encryptedString.length());
-			System.out.println("encryptedString: " + encryptedString);
-			outputBlocks.add(finalString);
-			outputBlocksAscii.add(encryptedString);
-			finalBinaryEncrypted += finalString;
-			finalAsciiEncrypted += encryptedString;
-		}
-		System.out.println("printing encrypted binary strings:");
-		for (String string : outputBlocks) {
-			System.out.println(string);
-		}
-		System.out.println("printing printable ascii strings:");
-		for (String string : outputBlocksAscii) {
-			System.out.println(string);
-		}
-		System.out.println("encrypted text:");
-		System.out.println(finalBinaryEncrypted);
-		System.out.println("encrypted text bits: " + finalBinaryEncrypted.length());
-		System.out.println("encrypted ascii text: ");
-		System.out.println(finalAsciiEncrypted);
-		return finalBinaryEncrypted;
-	}
 	
 	/*
 	 * 
@@ -726,28 +654,14 @@ public class DES {
 		if (!menu()){
 			//Get all the bytes from the file in a binary 8-bit format string
 			String binary = readBytesFromFile(file);
-			//Break the bytes into blocks of 64 bits if necessary
-			ArrayList<String> blocks;
-			if (binary.length() > 64){
-				blocks = breakMsgInBlocks(binary, 64);
-			}else{
-				//If the block is smaller than 64, just paddle the remaining bits to complete 64 bits
-				//and add to the ArrayList
-				String paddledString = paddle(binary, 64);
-				blocks = new ArrayList<String>();
-				blocks.add(paddledString);
-			}
-			//Perform the InitialPermutation on each of the blocks
-			ArrayList<String> permutedList = initialPermutation(blocks);
 			//An example of a 64-bit key
 			String desKey = "0001001100110100010101110111100110011011101111001101111111110001";
 			//Generate all the DES sub-keys
 			keys = generateKeys(desKey);
 			//Encrypt the original message 
-			String finalBinaryString = processInputData(permutedList, false);
+			String cypherText = processInputData(binary, "encrypt");
 			//Decrypt the encrypted message
-			String decryptedText = decryptText(finalBinaryString);
-			//String decryptedText = processInputData(permutedList, true);
+			String decryptedText = processInputData(cypherText, "decrypt");
 			System.out.printf("decrypted text: " + decryptedText);
 		}
 	}
