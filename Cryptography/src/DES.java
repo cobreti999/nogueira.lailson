@@ -1,5 +1,13 @@
+/*
+ * 
+ * Data Encryption Standard (DES) implementation using Java 7.
+ * @author: Lailson Lima Nogueira - Graduate Student at Loyola University Chicago
+ * Course: COMP 447 - Intrusion Detection and Network Security 
+ * Professor: Corby Schmitz
+ * 
+ */
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -11,8 +19,11 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class DES {
-	public static ArrayList<String> keys = new ArrayList<String>();
-	public final static String Sbox[][][] = {
+	private static File file = new File("test-msg.txt");
+	//All the des sub-keys are stored in an ArrayList<String> 
+	private static ArrayList<String> keys = new ArrayList<String>();
+	//The 3-dimensional matrix variable Sbox stores the values of the tables used in the algorithm
+	private final static String Sbox[][][] = {
 			//Box 1
 			{
 				//line 0
@@ -103,21 +114,8 @@ public class DES {
 			},
 		};
 	
-	public static String convertStringtoBinary(String s){
-		byte[] bytes = s.getBytes();
-		String binary = "";
-		  for (byte b : bytes)
-		  {
-		     int val = b;
-		     for (int i = 0; i < 8; i++)
-		     {
-		    	binary += ((val&128) == 0 ? 0 : 1);
-		        val <<= 1;
-		     }
-		  }
-		  return binary;
-	}
-	
+
+		
 	public static String convertBinaryToString(String binary){
 		  Charset oem = Charset.forName("Cp437");
 			ByteBuffer b = ByteBuffer.allocate(0xFF - 0x20 - 1);
@@ -157,28 +155,15 @@ public class DES {
 			return result;
 	}
 	
-	public String readMsgFromTextFile(File file){
-		String binary = "";
-		try {
-			Scanner scanner = new Scanner(file);
-			String lastString = "";
-			while (scanner.hasNextLine()) {
-		        String line = scanner.nextLine();		        
-		        lastString += line;
-		    }
-		    binary = convertStringtoBinary(lastString);
-		    System.out.println(binary.length());
-		    scanner.close();
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			//Adicionar depois codigo para criar o arquivo
-		}
-		return binary;
-	}
+	/*
+	 * 
+	 * breakMsgInBlocks(String msg, int blockSize) splits the message into blocks of 
+	 * blockSize length and stores each block in an ArrayList
+	 * 
+	 */
+	
 	
 	public static ArrayList<String> breakMsgInBlocks(String msg, int blockSize){
-		//<ArrayList<String> blocks keeps all the blocks that are going to be encrypted
 		ArrayList<String> blocks = new ArrayList<String>();
 		int begin = 0, end = blockSize;
 		for (int i = 0; i < msg.length(); i++) {
@@ -215,14 +200,16 @@ public class DES {
 				break;
 			}
 		}
-		for (String string : blocks) {
-			System.out.println(string);
-		}
-		System.out.println(blocks.size());
 		return blocks;
 	}
 	
-	//testada ok c 1 bloco
+	/*
+	 * 
+	 * initialPermutation(ArrayList<String blocks) performs the DES initialPermutation
+	 * in each one of the blocks.
+	 * 
+	 */
+	
 	public static ArrayList<String> initialPermutation(ArrayList<String> blocks){
 		ArrayList<String> permutedList = new ArrayList<String>();		
 		//Search through every block
@@ -266,23 +253,23 @@ public class DES {
 			//Add this string to the ArrayList and make the same process to the next block
 			permutedList.add(temp);
 		}
-		/*System.out.println("Imprimindo strings permutadas: ");
-		for (String string : permutedList) {
-			System.out.println(string);
-		}*/
 		return permutedList;
 	}
 	
-	//testada ok
-	public ArrayList<String> generateKeys(ArrayList<String> blocks, String desKey){
+	/*
+	 * 
+	 * generateKeys(String desKey) generates all des-subkeys based on the original desKey
+	 * 
+	 */
+	
+	public static ArrayList<String> generateKeys(String desKey){
+		//The ArrayList keys, will store all the des-subkeys
 		ArrayList<String> keys = new ArrayList<String>();
 		String c[] = new String[17];
 		String d[] = new String[17];
-		//(OBSSSSSS: VERIFICAR MAIS UMA VEZ SE ESSA PERMUTACAO TA CORRETA)
-		//Search through every block
+		//Performs the permutedChoice 1 on the desKey
 		int initValue = 56, reset = 56;
 		String temp = "";
-		System.out.println();
 		//Temp will store the new string formed by the permutation of elements
 		//according to the initial permutation table
 		//Permutes the first halt of the table. j < 4 insures that only the first 4 lines
@@ -327,33 +314,36 @@ public class DES {
 		temp += desKey.charAt(11);
 		temp += desKey.charAt(3);
 		d[0] = temp; 
-		
-		
-		//System.out.println("c: " + c[0]);
-		//System.out.println("d: " + d[0]);
+		//The first 28 bits of the permuted key is c[0] and the other 28 bits is d[0]
 		//Now that we have c[0] and d[0], we must calculate all the k[16] keys.
 		for (int i =1; i <= 16; i++){
+			//Perform one or two circular left shifts on both c[i] and d[i]
 			c[i] = shiftLeft(c[i-1], i);
-			//System.out.println("c[" + i + "]: " + c[i]);
 			d[i] = shiftLeft(d[i-1], i);
-			//System.out.println("d[" + i + "]: " + d[i]);
+			//Perform another permutation (permutedChoice2) on c[i] and d[i] and
+			//saves the result on the ArrayList of keys.
 			keys.add(permutedChoice2(c[i], d[i]));
-		}
-		int i =1;
-		for (String string : keys) {
-			System.out.println("key : " + i++ + " " + string);
 		}
 		return keys;
 	}
 	
-	//testada ok
+	/*
+	 * 
+	 * shiftLeft(String value, int round) performs one or two circular left shift on the 
+	 * binary string. The number of circular left shifts is controlled by the variable
+	 * round.
+	 * 
+	 */
+	
 	private static String shiftLeft(String value, int round){
 		String shiftedString = "";
 		if (round==1 || round==2 || round==9 || round==16){
 			//Perform 1 left shift
 			StringBuffer s = new StringBuffer(value);
 			char c = s.charAt(0);
+			//Append the first character to the end of the string
 			s.append(c);
+			//Delete the first character
 			s.deleteCharAt(0);
 			shiftedString = s.toString();
 		}
@@ -371,7 +361,13 @@ public class DES {
 		return shiftedString;
 	}
 	
-	//testada ok
+	/*
+	 * 
+	 * permutedChoice2(String c, String d) performs a string permutation on the concatenated
+	 * string c+d.
+	 * 
+	 */
+	
 	private static String permutedChoice2(String c, String d){
 		String permutedString = "";
 		String cd = c+d;
@@ -406,7 +402,13 @@ public class DES {
 		return (s3);
 	}
 	
-	public String processInputData(ArrayList<String> permutedList){
+	/*
+	 * 
+	 * 
+	 * 
+	 */
+	
+	public static String processInputData(ArrayList<String> permutedList, boolean isDecrypt){
 		ArrayList<String> outputBlocks = new ArrayList<String>();
 		ArrayList<String> outputBlocksAscii = new ArrayList<String>();
 		String finalBinaryEncrypted = "";
@@ -433,7 +435,13 @@ public class DES {
 						+ secondHalf[i].substring(27, 32) + secondHalf[i].charAt(0);	
 				System.out.println("expandedR[" + i + "]: " + expandedR);
 				//Exclusive-OR E(secondHalf[i-1]) with K[i]
-				String exclusiveResult = exclusiveOr(expandedR, keys.get(i));
+				String exclusiveResult;
+				if (isDecrypt){
+					exclusiveResult = exclusiveOr(expandedR, keys.get(15-i));
+				}else{
+					exclusiveResult = exclusiveOr(expandedR, keys.get(i));
+				}
+					
 				System.out.println("exclusiveResult: " + exclusiveResult);
 				ArrayList<String> string6bitsArray = breakMsgInBlocks(exclusiveResult, 6);
 				int box = 0;
@@ -528,15 +536,24 @@ public class DES {
 		}
 		return (zeros+result);
 	}
-		
+	
+	/*
+	 * 
+	 * readBytesFromFile(File f) receives a file, get it's bytes and converts it to 
+	 * a string in binary 8-bit format
+	 * 
+	 */
+	
 	public static String readBytesFromFile(File f){
 		Path path = Paths.get(f.getPath());
 		String binary = "";
 		try{
+			//breaks the file into a byte array 
 			byte[] data = Files.readAllBytes(path);
 			  for (byte b : data)
 			  {
 			     int val = b;
+			     //Converts each byte to a binary, 8-bit format
 			     for (int i = 0; i < 8; i++)
 			     {
 			    	binary += ((val&128) == 0 ? 0 : 1);
@@ -649,31 +666,90 @@ public class DES {
 		System.out.println(finalAsciiEncrypted);
 		return finalBinaryEncrypted;
 	}
+	
+	/*
+	 * 
+	 * menu() asks for the user to specify a text file with a message to be encrypted/decrypted
+	 * 
+	 */
+	
+	public static boolean menu(){
+		Scanner keyboard = new Scanner(System.in);
+		String filename;
+		boolean exit = false;
+		do{
+			System.out.println("Type the name of the file to be encrypted (exit to leave)");
+			filename = keyboard.next();
+			//If the user types 'exit', closes the program
+			if (filename.equalsIgnoreCase("exit")){
+				exit = true;
+				break;
+			}
+			file = new File(filename);
+			//Check if the file exists
+			if (!file.exists()){
+				System.out.print("The file " + filename + " doesn't exists in the current directory.");
+			}
+		}while(!file.exists());
+		return exit;
+	}
 
+	/*
+	 * 
+	 * paddle(String msg, int blockSize) if the block is smaller than the blockSize,
+	 * the remaining bits are paddled to make the block have the same size as the blockSize
+	 * 
+	 */
+	
+	public static String paddle(String msg, int blockSize){
+		String bitsLeftOver = "";
+		//Calculates the number of bits that are going to be padded.
+		int numBitsLeftOver = blockSize - msg.length();
+		//If the last data bit of the message is 
+		//"0" then "1"s are used as padding bits and if the last data bit is"1" 
+		//then "0"s are used
+		for (int j =0; j < numBitsLeftOver;j++){
+			if (msg.endsWith("1")){
+				bitsLeftOver += "0";
+			}
+			else{
+				bitsLeftOver += "1";
+			}
+		}
+		return (msg+bitsLeftOver);
+		
+	}
+	
 	
 	public static void main(String args[]){
-		DES d = new DES();
-		File file = new File("test-msg.txt");
-		//File file = new File("HelloWorld.txt");
-		String binary = readBytesFromFile(file);
-		
-		//MUDA O BINARY PRA FICAR IGUAL AO EXEMPLO
-		//String binary = "0101011011101001100111101010110011011110010111111111010010110001";
-		//binary = "0000000100100011010001010110011110001001101010111100110111101111";
-		ArrayList<String> blocks = d.breakMsgInBlocks(binary, 64);
-		ArrayList<String> permutedList = d.initialPermutation(blocks);
-		//desKey da animacao. Tudo indica que existem erros no algoritmo de key schedule
-		//String desKey = "0011010000101101101101011010100000011101110110111001000000000100";
-		
-		
-		//deskey do exemplo da net. Tudo indica que ha um erro na permutedchoice1, o key schedule esta correto
-		//String desKey = "1101111000010000100111000101100011101000101001001010011000110000";
-		String desKey = "0001001100110100010101110111100110011011101111001101111111110001";
-		keys = d.generateKeys(blocks, desKey);
-		String finalBinaryString = d.processInputData(permutedList);
-		String originalText = decryptText(finalBinaryString);
-		System.out.printf("original text: " + originalText);
-
+		//Call menu and check if the user didn't type 'exit'
+		if (!menu()){
+			//Get all the bytes from the file in a binary 8-bit format string
+			String binary = readBytesFromFile(file);
+			//Break the bytes into blocks of 64 bits if necessary
+			ArrayList<String> blocks;
+			if (binary.length() > 64){
+				blocks = breakMsgInBlocks(binary, 64);
+			}else{
+				//If the block is smaller than 64, just paddle the remaining bits to complete 64 bits
+				//and add to the ArrayList
+				String paddledString = paddle(binary, 64);
+				blocks = new ArrayList<String>();
+				blocks.add(paddledString);
+			}
+			//Perform the InitialPermutation on each of the blocks
+			ArrayList<String> permutedList = initialPermutation(blocks);
+			//An example of a 64-bit key
+			String desKey = "0001001100110100010101110111100110011011101111001101111111110001";
+			//Generate all the DES sub-keys
+			keys = generateKeys(desKey);
+			//Encrypt the original message 
+			String finalBinaryString = processInputData(permutedList, false);
+			//Decrypt the encrypted message
+			String decryptedText = decryptText(finalBinaryString);
+			//String decryptedText = processInputData(permutedList, true);
+			System.out.printf("decrypted text: " + decryptedText);
+		}
 	}
 }
 
