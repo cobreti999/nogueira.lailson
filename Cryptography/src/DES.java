@@ -7,7 +7,10 @@
  * 
  */
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
@@ -19,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class DES {
+	//By default a File called "test-msg-txt", this is changed later by the user
 	private static File file = new File("test-msg.txt");
 	//All the des sub-keys are stored in an ArrayList<String> 
 	private static ArrayList<String> keys = new ArrayList<String>();
@@ -114,40 +118,49 @@ public class DES {
 			},
 		};
 	
-
+	/*
+	 * 
+	 * convertBinaryToString(String binary) receives a binary string as argument and returns
+	 * an ascii representation of the string
+	 * 
+	 */
 		
 	public static String convertBinaryToString(String binary){
-		  Charset oem = Charset.forName("Cp437");
-			ByteBuffer b = ByteBuffer.allocate(0xFF - 0x20 - 1);
-			for (int i = 0x20; i < 0xFF; i++) {
-			    if (i == 0x7F) {
-			        // skip DEL
-			        continue;
-			    }
-
-			    b.put((byte) i);
+		//Put all the ascii characters in a string format
+		Charset oem = Charset.forName("Cp437");
+		ByteBuffer b = ByteBuffer.allocate(0xFF - 0x20 - 1);
+		for (int i = 0x20; i < 0xFF; i++) {
+			if (i == 0x7F) {
+				// skip DEL
+				continue;
 			}
-			b.flip();
-			CharBuffer c = oem.decode(b);
-			String table = c.toString();
-			int ascii = 32;
-			String result = "";
-			StringBuilder asciiTable = new StringBuilder(table);
-			asciiTable.insert(127-ascii, ' ');
-			
-			for (int i = 0; i < 32; i++) {
-				asciiTable.insert(0, ' ');
-			}
-			asciiTable.append(' ');
-			
-			table = asciiTable.toString();
-			
-			int bits = 8;
-			for (int i =0; i < binary.length(); i += bits){
-				int value = Integer.parseInt(binary.substring(i, i + bits), 2);
-				result += table.charAt(value);
-			}
-			return result;
+			b.put((byte) i);
+		}
+		b.flip();
+		CharBuffer c = oem.decode(b);
+		//The variable table contains all the ascii table, including special characters excluding
+		//non-printable characters
+		String table = c.toString();
+		int ascii = 32;
+		String result = "";
+		StringBuilder asciiTable = new StringBuilder(table);
+		//Insert a blank space at position 127 of the table (the non-printable character DEL was not included)
+		asciiTable.insert(127-ascii, ' ');
+		//Insert a blank space at the first 31 characters of the table (non-printable characters are 
+		//represented as blank spaces
+		for (int i = 0; i < 32; i++) {
+			asciiTable.insert(0, ' ');
+		}
+		//Add a final blank space at the last position of the table (255)
+		asciiTable.append(' ');
+		table = asciiTable.toString();
+		//Agregate each byte and search in the table for the corresponding value
+		int bits = 8;
+		for (int i =0; i < binary.length(); i += bits){
+			int value = Integer.parseInt(binary.substring(i, i + bits), 2);
+			result += table.charAt(value);
+		}
+		return result;
 	}
 	
 	/*
@@ -178,7 +191,6 @@ public class DES {
 				if (msg.length() % blockSize != 0){
 					//Calculates the number of bits that are going to be padded.
 					int numBitsLeftOver = blockSize - (msg.length()-begin);
-					System.out.println(numBitsLeftOver);
 					//Also, according to fips 81:  if the last data bit of the message is 
 					//"0" then "1"s are used as padding bits and if the last data bit is"1" 
 					//then "0"s are used
@@ -330,7 +342,7 @@ public class DES {
 	 * 
 	 */
 	
-	private static String shiftLeft(String value, int round){
+	public static String shiftLeft(String value, int round){
 		String shiftedString = "";
 		if (round==1 || round==2 || round==9 || round==16){
 			//Perform 1 left shift
@@ -363,7 +375,7 @@ public class DES {
 	 * 
 	 */
 	
-	private static String permutedChoice2(String c, String d){
+	public static String permutedChoice2(String c, String d){
 		String permutedString = "";
 		String cd = c+d;
 		permutedString = ""+cd.charAt(13)+cd.charAt(16)+cd.charAt(10)+cd.charAt(23)+cd.charAt(0)+cd.charAt(4)
@@ -386,12 +398,13 @@ public class DES {
 	
 	
 	public static String exclusiveOr(String s1, String s2){
-		
+		//Convert each string to integer
 		BigInteger i1 = new BigInteger(s1, 2);
 		BigInteger i2 = new BigInteger(s2, 2);
+		//Use the method xor of the class BigInteger
 		BigInteger res = i1.xor(i2);
+		//Convert the result back to string
 		String s3 = res.toString(2);
-		
 		String zeros = "";
 		int size = s3.length();
 		//add zeros if necessary to make a 4 bit number
@@ -424,10 +437,6 @@ public class DES {
 		}
 		//Performs an initialPermutation on all blocks of the message
 		ArrayList<String> permutedList = initialPermutation(blocks);
-		
-		
-		ArrayList<String> outputBlocks = new ArrayList<String>();
-		ArrayList<String> outputBlocksAscii = new ArrayList<String>();
 		String finalBinaryEncrypted = "";
 		String finalAsciiEncrypted = "";
 		//Iterate over all blocks
@@ -487,27 +496,107 @@ public class DES {
 			//Perform FinalPermutation on the string formed by the following 
 			//concatenation "secondhalf[16]firsthalf[16]"
 			String lastRoundResult = secondHalf[16]+firstHalf[16];
+			//finalString contains the cyphertext of the block in the binary format
 			String finalString = finalPermutation(lastRoundResult);
+			//encryptedString contains the cyphertext of the block in the ascii format
 			String encryptedString = convertBinaryToString(finalString);
-			outputBlocks.add(finalString);
-			outputBlocksAscii.add(encryptedString);
 			finalBinaryEncrypted += finalString;
 			finalAsciiEncrypted += encryptedString;
 		}
-		System.out.println("printing encrypted binary strings:");
-		for (String string : outputBlocks) {
-			System.out.println(string);
+		String hexFormat;
+		if (operation.equalsIgnoreCase("encrypt")){
+			//if the operation is encrypt, convert the binary string to hexformat and create
+			//a file to store the cipher text.
+			System.out.println("Encrypted text in hex format: ");
+			hexFormat = convertBinaryStringtoHex(finalBinaryEncrypted);
+			System.out.println(hexFormat);
+			createFileWithText(hexFormat, operation);
+		}else{
+			//if the operation is decrypt, show the decrypted text on screen and create a file 
+			//with the decrypted text.
+			System.out.println("Decrypted ascii text: ");
+			System.out.println(finalAsciiEncrypted);
+			createFileWithText(finalAsciiEncrypted, operation);
 		}
-		System.out.println("printing printable ascii strings:");
-		for (String string : outputBlocksAscii) {
-			System.out.println(string);
-		}
-		System.out.println("encrypted text:");
-		System.out.println(finalBinaryEncrypted);
-		System.out.println("encrypted ascii text: ");
-		System.out.println(finalAsciiEncrypted);
 		return finalBinaryEncrypted;
 	}
+	
+	/*
+	 * 
+	 * createFileWithText(String text, String operation) creates a text file which will store
+	 * the cipher text (CipherText.txt) or the decrypted text (DecryptedText.txt).
+	 * 
+	 */
+	
+	public static void createFileWithText(String text, String operation){
+		File file;
+		if (operation.equalsIgnoreCase("encrypt")){
+			file = new File("CipherText.txt");
+		}else{
+			file = new File("DecryptedText.txt");
+		}
+		try{
+			file.createNewFile();
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(text);
+			bw.close();
+			System.out.println("File " + file.getName() + " created!");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	
+	/*
+	 * 
+	 * convertBinaryStringtoHex(String input) receives an input string in binary format
+	 * and convert it to Hexadecimal format.
+	 * 
+	 */
+	
+	public static String convertBinaryStringtoHex(String input){
+		return new BigInteger(input, 2).toString(16);
+	}
+	
+	/*
+	 * 
+	 * convertHexStringtoBinary(String input) receives an input string in hexadecimal format
+	 * and convert it to binary format.
+	 * 
+	 */
+	
+	public static String convertHexStringtoBinary(String input){
+		return new BigInteger(input, 16).toString(2);
+	}
+	
+	/*
+	 * 
+	 * readMsgFromTextFile(String filename) reads the ciphertext in the hexadecimal format and
+	 * convert it to binary format.
+	 * 
+	 */
+	
+	public static String readMsgFromTextFile(String fileName){
+		String binary = "";
+		String lastString = "";
+		File file = new File(fileName);
+		try {
+			Scanner scanner = new Scanner(file);
+			//Reads all the content of the file
+			while (scanner.hasNextLine()) {
+		        String line = scanner.nextLine();		        
+		        lastString += line;
+		    }
+			//Convert the string in hexFormat to BinaryFormat
+		    binary = convertHexStringtoBinary(lastString);
+		    scanner.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		return binary;
+	}
+	
 	
 	/*
 	 * 
@@ -553,7 +642,7 @@ public class DES {
 	 * 
 	 */
 	
-	private static String convertStringTo4Bits(String s){
+	public static String convertStringTo4Bits(String s){
 		String result = Integer.toBinaryString(Integer.parseInt(s));
 		int size = result.length();
 		String zeros = "";
@@ -648,6 +737,12 @@ public class DES {
 		
 	}
 	
+	/*
+	 * 
+	 * main(String args[]) is the main method of the class. Calls menu(), read from a File,
+	 * generate all des sub-keys and encrypt/decrypt a text file
+	 * 
+	 */
 	
 	public static void main(String args[]){
 		//Call menu and check if the user didn't type 'exit'
@@ -659,10 +754,41 @@ public class DES {
 			//Generate all the DES sub-keys
 			keys = generateKeys(desKey);
 			//Encrypt the original message 
-			String cypherText = processInputData(binary, "encrypt");
-			//Decrypt the encrypted message
-			String decryptedText = processInputData(cypherText, "decrypt");
-			System.out.printf("decrypted text: " + decryptedText);
+			processInputData(binary, "encrypt");
+			String option;
+			Scanner keyboard = new Scanner(System.in);
+			//Decrypt the message in CipherText.txt or other file that the user may provide
+			do{
+				System.out.println("Do you want to decrypt the text from the file previously created? (Y/N)");
+				option = keyboard.next();
+			}while(!option.equalsIgnoreCase("yes") && !option.equalsIgnoreCase("no") && 
+					!option.equalsIgnoreCase("y") && !option.equalsIgnoreCase("n") &&
+					!option.equalsIgnoreCase("exit"));
+			//If the user typed 'y', then the program reads the text from CipherText.txt and 
+			//performs the decryption over the content of this file
+			if (option.equalsIgnoreCase("yes") || option.equalsIgnoreCase("y")){
+				String decryptInput = readMsgFromTextFile("CipherText.txt");
+				processInputData(decryptInput, "decrypt");
+			}
+			//If the user typed 'n', he must enter the name of another text file to be decrypted
+			//The content of the file must be in hexadecimal format and should have been encrypted
+			//using the same keys used in the encryption
+			else if (option.equalsIgnoreCase("no") || option.equalsIgnoreCase("n")){
+				File f;
+				String fileName;
+				do{
+					System.out.println("Type the name of the text file that you want to decrypt");
+					fileName = keyboard.next();
+					f = new File(fileName);
+					if (!f.exists()){
+						System.out.println("File not found.");
+					}
+				}while(!f.exists() && !fileName.equalsIgnoreCase("exit"));
+				if (!fileName.equalsIgnoreCase("exit")){
+					String decryptInput = readMsgFromTextFile(fileName);
+					processInputData(decryptInput, "decrypt");
+				}
+			}
 		}
 	}
 }
