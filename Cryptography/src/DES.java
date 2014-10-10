@@ -2,7 +2,7 @@
  * 
  * Data Encryption Standard (DES) implementation using Java 7.
  * @author: Lailson Lima Nogueira - Graduate Student at Loyola University Chicago
- * Course: COMP 447 - Intrusion Detection and Network Security 
+ * Course: COMP 447 - Intrusion Detection and Network Security Fall 2014
  * Professor: Corby Schmitz
  * 
  */
@@ -581,6 +581,7 @@ public class DES {
 		String binary = "";
 		String lastString = "";
 		File file = new File(fileName);
+    	String zeros = "";
 		try {
 			Scanner scanner = new Scanner(file);
 			//Reads all the content of the file
@@ -590,11 +591,16 @@ public class DES {
 		    }
 			//Convert the string in hexFormat to BinaryFormat
 		    binary = convertHexStringtoBinary(lastString);
+		    if (binary.length() < 64){
+		    	for (int i = binary.length(); i < 64; i++) {
+					zeros += "0";
+				}
+		    }
 		    scanner.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		return binary;
+		return zeros+binary;
 	}
 	
 	
@@ -792,4 +798,3 @@ public class DES {
 		}
 	}
 }
-
