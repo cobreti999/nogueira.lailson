@@ -1,3 +1,4 @@
+package edu.loyola.cryptography.des.core;
 /*
  * 
  * Data Encryption Standard (DES) implementation using Java 7.
@@ -531,7 +532,7 @@ public class DES {
 	public static void createFileWithText(String text, String operation){
 		File file;
 		if (operation.equalsIgnoreCase("encrypt")){
-			file = new File("CipherText.txt");
+			file = new File("CipherText.cipher");
 		}else{
 			file = new File("DecryptedText.txt");
 		}
@@ -751,8 +752,9 @@ public class DES {
 	 */
 	
 	public static void main(String args[]){
+		long t1 = System.currentTimeMillis();
 		//Call menu and check if the user didn't type 'exit'
-		if (!menu()){
+		//if (!menu()){
 			//Get all the bytes from the file in a binary 8-bit format string
 			String binary = readBytesFromFile(file);
 			//An example of a 64-bit key
@@ -761,6 +763,8 @@ public class DES {
 			keys = generateKeys(desKey);
 			//Encrypt the original message 
 			processInputData(binary, "encrypt");
+			long t2 = System.currentTimeMillis();
+			System.out.println("time: " + (t2-t1) + " miliseconds");
 			String option;
 			Scanner keyboard = new Scanner(System.in);
 			//Decrypt the message in CipherText.txt or other file that the user may provide
@@ -795,6 +799,6 @@ public class DES {
 					processInputData(decryptInput, "decrypt");
 				}
 			}
-		}
+		//}
 	}
 }
