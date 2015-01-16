@@ -1,12 +1,14 @@
-package edu.loyola.cryptography.des.core;
 /*
  * 
  * Data Encryption Standard (DES) implementation using Java 7.
+ * Core Class
  * @author: Lailson Lima Nogueira - Graduate Student at Loyola University Chicago
  * Course: COMP 447 - Intrusion Detection and Network Security Fall 2014
  * Professor: Corby Schmitz
  * 
  */
+
+package edu.loyola.cryptography.des.core;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,8 +25,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class DES {
-	//By default a File called "test-msg-txt", this is changed later by the user
-	private static File file = new File("test-msg.txt");
+	
 	//All the des sub-keys are stored in an ArrayList<String> 
 	private static ArrayList<String> keys = new ArrayList<String>();
 	//The 3-dimensional matrix variable Sbox stores the values of the tables used in the algorithm
@@ -418,13 +419,27 @@ public class DES {
 	
 	/*
 	 * 
-	 * processInputData(String text, String operation) is where occurs the processing of the input data.
-	 * It receives a String 'text' as argument and a String 'operation' which indicates if the user
+	 * processInputData(File file, String operation) is where occurs the processing of the input data.
+	 * It receives the input File as argument and a String 'operation' which indicates if the user
 	 * wants to encrypt or decrypt the text. 
 	 * 
 	 */
 	
-	public static String processInputData(String text, String operation){
+	public static String processInputData(File file, String operation){
+		//First we need to generate all des sub-keys
+		//For simplicity we always use the same 64-bit key
+		String desKey = "0001001100110100010101110111100110011011101111001101111111110001";
+		//Generate all the DES sub-keys
+		keys = generateKeys(desKey);
+		
+		//Read the input text
+		String text;
+		if(operation.equals("encrypt")){
+			text = readBytesFromFile(file);
+		}else{
+			text = readMsgFromTextFile(file.getAbsolutePath());
+		}
+		
 		//The first step is to divide the text into blocks of 64 bits according to DES specification
 		ArrayList<String> blocks;
 		if (text.length() > 64){
@@ -525,7 +540,7 @@ public class DES {
 	/*
 	 * 
 	 * createFileWithText(String text, String operation) creates a text file which will store
-	 * the cipher text (CipherText.txt) or the decrypted text (DecryptedText.txt).
+	 * the cipher text (CipherText.cipher) or the decrypted text (DecryptedText.txt).
 	 * 
 	 */
 	
@@ -690,33 +705,6 @@ public class DES {
 
 	}
 	
-	
-	/*
-	 * 
-	 * menu() asks for the user to specify a text file with a message to be encrypted/decrypted
-	 * 
-	 */
-	
-	public static boolean menu(){
-		Scanner keyboard = new Scanner(System.in);
-		String filename;
-		boolean exit = false;
-		do{
-			System.out.println("Type the name of the file to be encrypted (exit to leave)");
-			filename = keyboard.next();
-			//If the user types 'exit', closes the program
-			if (filename.equalsIgnoreCase("exit")){
-				exit = true;
-				break;
-			}
-			file = new File(filename);
-			//Check if the file exists
-			if (!file.exists()){
-				System.out.print("The file " + filename + " doesn't exists in the current directory.");
-			}
-		}while(!file.exists());
-		return exit;
-	}
 
 	/*
 	 * 
@@ -742,63 +730,5 @@ public class DES {
 		}
 		return (msg+bitsLeftOver);
 		
-	}
-	
-	/*
-	 * 
-	 * main(String args[]) is the main method of the class. Calls menu(), read from a File,
-	 * generate all des sub-keys and encrypt/decrypt a text file
-	 * 
-	 */
-	
-	public static void main(String args[]){
-		long t1 = System.currentTimeMillis();
-		//Call menu and check if the user didn't type 'exit'
-		//if (!menu()){
-			//Get all the bytes from the file in a binary 8-bit format string
-			String binary = readBytesFromFile(file);
-			//An example of a 64-bit key
-			String desKey = "0001001100110100010101110111100110011011101111001101111111110001";
-			//Generate all the DES sub-keys
-			keys = generateKeys(desKey);
-			//Encrypt the original message 
-			processInputData(binary, "encrypt");
-			long t2 = System.currentTimeMillis();
-			System.out.println("time: " + (t2-t1) + " miliseconds");
-			String option;
-			Scanner keyboard = new Scanner(System.in);
-			//Decrypt the message in CipherText.txt or other file that the user may provide
-			do{
-				System.out.println("Do you want to decrypt the text from the file previously created? (Y/N)");
-				option = keyboard.next();
-			}while(!option.equalsIgnoreCase("yes") && !option.equalsIgnoreCase("no") && 
-					!option.equalsIgnoreCase("y") && !option.equalsIgnoreCase("n") &&
-					!option.equalsIgnoreCase("exit"));
-			//If the user typed 'y', then the program reads the text from CipherText.txt and 
-			//performs the decryption over the content of this file
-			if (option.equalsIgnoreCase("yes") || option.equalsIgnoreCase("y")){
-				String decryptInput = readMsgFromTextFile("CipherText.txt");
-				processInputData(decryptInput, "decrypt");
-			}
-			//If the user typed 'n', he must enter the name of another text file to be decrypted
-			//The content of the file must be in hexadecimal format and should have been encrypted
-			//using the same keys used in the encryption
-			else if (option.equalsIgnoreCase("no") || option.equalsIgnoreCase("n")){
-				File f;
-				String fileName;
-				do{
-					System.out.println("Type the name of the text file that you want to decrypt");
-					fileName = keyboard.next();
-					f = new File(fileName);
-					if (!f.exists()){
-						System.out.println("File not found.");
-					}
-				}while(!f.exists() && !fileName.equalsIgnoreCase("exit"));
-				if (!fileName.equalsIgnoreCase("exit")){
-					String decryptInput = readMsgFromTextFile(fileName);
-					processInputData(decryptInput, "decrypt");
-				}
-			}
-		//}
 	}
 }
