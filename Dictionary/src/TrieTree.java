@@ -1,152 +1,132 @@
 /*
- *  Java Program to Implement Trie
+ * 
+ * WordFinder auxiliary classes.
+ * 
  */
- 
-import java.util.*;
- 
-class TrieNode 
+
+import java.util.ArrayList;;
+
+/*
+ * 
+ * Node Class is the logical representation of a Node to be used by a Trie Tree
+ * 
+ */
+
+class Node 
 {
-    char content; 
-    boolean isEnd; 
-    int count;  
-    LinkedList<TrieNode> childList; 
- 
-    /* Constructor */
-    public TrieNode(char c)
-    {
-        childList = new LinkedList<TrieNode>();
-        isEnd = false;
-        content = c;
-        count = 0;
-    }  
-    public TrieNode subNode(char c)
-    {
-        if (childList != null)
-            for (TrieNode eachChild : childList)
-                if (eachChild.content == c)
-                    return eachChild;
-        return null;
-    }
+	boolean isEnd; 
+	ArrayList<Node> childList; 
+	int count; 
+	char letter; 
+
+	public Node(char c)
+	{
+		childList = new ArrayList<Node>();
+		isEnd = false;
+		letter = c;
+		count = 0;
+	}  
+	
+	public Node subNode(char c)
+	{
+		if (childList != null)
+			for (Node eachChild : childList)
+				if (eachChild.letter == c)
+					return eachChild;
+		return null;
+	}
 }
- 
+
+/*
+ * 
+ * TrieTree is used to store the dictionary
+ * 
+ */
+
 class TrieTree
 {
-    private TrieNode root;
- 
-     /* Constructor */
-    public TrieTree()
-    {
-        root = new TrieNode(' '); 
-    }
-     /* Function to insert word */
-    public void insert(String word)
-    {
-        if (search(word) == true) 
-            return;        
-        TrieNode current = root; 
-        for (char ch : word.toCharArray() )
-        {
-            TrieNode child = current.subNode(ch);
-            if (child != null)
-                current = child;
-            else 
-            {
-                 current.childList.add(new TrieNode(ch));
-                 current = current.subNode(ch);
-            }
-            current.count++;
-        }
-        current.isEnd = true;
-    }
-    /* Function to search for word */
-    public boolean search(String word)
-    {
-        TrieNode current = root;  
-        for (char ch : word.toCharArray() )
-        {
-            if (current.subNode(ch) == null)
-                return false;
-            else
-                current = current.subNode(ch);
-        }      
-        if (current.isEnd == true) 
-            return true;
-        return false;
-    }
-    /* Function to remove a word */
-    public void remove(String word)
-    {
-        if (search(word) == false)
+	private Node root;
+
+	public TrieTree()
+	{
+		root = new Node(' '); 
+	}
+	
+	/*
+	 * 
+	 * add(String word) add a new element to the Tree 
+	 * 
+	 */
+	
+	public void add(String word)
+	{
+		if (search(word) == true) 
+			return;        
+		Node current = root; 
+		for (char ch : word.toCharArray() )
+		{
+			Node child = current.subNode(ch);
+			if (child != null)
+				current = child;
+			else 
+			{
+				current.childList.add(new Node(ch));
+				current = current.subNode(ch);
+			}
+			current.count++;
+		}
+		current.isEnd = true;
+	}
+	
+	/*
+	 * 
+	 * search(String word) returns true if string is already inside the tree
+	 * 
+	 */
+	
+	public boolean search(String word)
+	{
+		Node current = root;  
+		for (char ch : word.toCharArray() )
+		{
+			if (current.subNode(ch) == null)
+				return false;
+			else
+				current = current.subNode(ch);
+		}      
+		if (current.isEnd == true) 
+			return true;
+		return false;
+	}
+	
+	/*
+	 * 
+	 * remove(String word) removes an word from the Trie Tree
+	 * 
+	 */
+	
+	public void remove(String word)
+	{ 
+		if (search(word) == false)
         {
             System.out.println(word +" does not exist in trie\n");
             return;
-        }             
-        TrieNode current = root;
-        for (char ch : word.toCharArray()) 
-        { 
-            TrieNode child = current.subNode(ch);
-            if (child.count == 1) 
-            {
-                current.childList.remove(child);
-                return;
-            } 
-            else 
-            {
-                child.count--;
-                current = child;
-            }
-        }
-        current.isEnd = false;
-    }
-}    
- 
-/* Class Trie Test */
-/*public class TrieTest
-{
-    public static void main(String[] args)
-    {            
-        Scanner scan = new Scanner(System.in);
-        ///* Creating object of AATree 
-        Trie t = new Trie(); 
-        System.out.println("Trie Test\n");          
-        char ch;
-        ///*  Perform tree operations  
-        do    
-        {
-            System.out.println("\nTrie Operations\n");
-            System.out.println("1. insert ");
-            System.out.println("2. delete");
-            System.out.println("3. search");
- 
-            int choice = scan.nextInt();            
-            switch (choice)
-            {
-            case 1 : 
-                System.out.println("Enter string element to insert");
-                t.insert( scan.next() );                     
-                break;                          
-            case 2 : 
-                System.out.println("Enter string element to delete");
-                try
-                {
-                    t.remove( scan.next() ); 
-                }                    
-                catch (Exception e)
-                {
-                    System.out.println(e.getMessage()+" not found ");
-                }
-                break;                         
-            case 3 : 
-                System.out.println("Enter string element to search");
-                System.out.println("Search result : "+ t.search( scan.next() ));
-                break;                                          
-            default : 
-                System.out.println("Wrong Entry \n ");
-                break;   
-            }
- 
-            System.out.println("\nDo you want to continue (Type y or n) \n");
-            ch = scan.next().charAt(0);                        
-        } while (ch == 'Y'|| ch == 'y');               
-    }*/
+        } 
+		Node current = root;
+		for (char ch : word.toCharArray()) 
+		{ 
+			Node child = current.subNode(ch);
+			if (child.count == 1) 
+			{
+				current.childList.remove(child);
+				return;
+			} 
+			else 
+			{
+				child.count--;
+				current = child;
+			}
+		}
+		current.isEnd = false;
+	}              
 }
