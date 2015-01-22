@@ -125,12 +125,13 @@ public class Main {
 	 * current column and endIndex inside the line
 	 * 
 	 */
-	
+	static int t = 0;
 	public static String getHorizontalWord(int line, int column, int endIndex){
 		String result = "";
 		for (int k = column; k <= endIndex; k++){
 			//the line is fixed, what changes is the column
 			result += matrix[line][k];
+			t++;
 		}
 		return result;
 	}
@@ -147,6 +148,7 @@ public class Main {
 		for (int k = line; k <= endIndex; k++){
 			//the column is fixed, what changes is the line
 			result += matrix[k][column];
+			t++;
 		}
 		return result;
 	}
@@ -158,6 +160,7 @@ public class Main {
 	 */
 	
 	public static boolean compareWords(String word){
+		t = t+ word.length();
 		if (dictionary.search(word)){
 			return true;
 		}
@@ -172,7 +175,7 @@ public class Main {
 	 */
 	
 	public static void getWordsFromDictionary(){
-		File file = new File("EnglishWordList.txt");
+		File file = new File("EnglishDictionary.txt");
 		try {
 			Scanner scanner = new Scanner(file);
 			//Reads all the content of the file
@@ -237,6 +240,34 @@ public class Main {
 		return n;
 	}
 	
+	public static void testMode(){
+		getWordsFromDictionary();
+		for (int n = 10; n <= 100; n = n+10){
+			//int n =10;
+			System.out.println("Order: " + n);
+			createMatrix(n);
+			System.out.println("Searching Horizontally...");
+			long t1 = System.currentTimeMillis();
+			//Search Horizontally
+			String horizontalWords = searchMatrixHorizontally();
+			long t2 = System.currentTimeMillis();
+			System.out.println("time elapsed in search: " + (t2-t1) + " miliseconds");
+			System.out.println("Searching Vertically...");
+			long t3 = System.currentTimeMillis();
+			//Search Vertically
+			String veritcalWords = searchMatrixVertically();
+			long t4 = System.currentTimeMillis();
+			System.out.println("time elapsed in search: " + (t4-t3) + " miliseconds");
+			System.out.println("Printing Strings:");
+			System.out.println("Horizontal Words: " + horizontalWords);
+			System.out.println("Vertical Words: " + veritcalWords);
+			System.out.println();
+			System.out.println("t " + t);
+			t=0;
+		}
+	}
+	
+	
 	/*
 	 * 
 	 * main(String args[]) is the main method and is responsible to create the menu 
@@ -245,6 +276,8 @@ public class Main {
 	
 	
 	public static void main(String args[]){
+		testMode();
+		/*
 		Scanner keyboard = new Scanner(System.in);
 		boolean validOption = true;
 		do{
@@ -301,7 +334,7 @@ public class Main {
 		System.out.println("Printing Strings:");
 		System.out.println("Horizontal Words: " + horizontalWords);
 		System.out.println("Vertical Words: " + veritcalWords);
-		System.out.println("End.");
+		System.out.println("End.");*/
 	}
 
 }

@@ -4,7 +4,7 @@
  * 
  */
 
-import java.util.ArrayList;;
+import java.util.LinkedList;
 
 /*
  * 
@@ -12,26 +12,23 @@ import java.util.ArrayList;;
  * 
  */
 
-class Node 
-{
+class Node {
 	boolean isEnd; 
-	ArrayList<Node> childList; 
+	LinkedList<Node> childList; 
 	int count; 
 	char letter; 
 
-	public Node(char c)
-	{
-		childList = new ArrayList<Node>();
+	public Node(char letter){
+		childList = new LinkedList<Node>();
 		isEnd = false;
-		letter = c;
+		this.letter = letter;
 		count = 0;
 	}  
 	
-	public Node subNode(char c)
-	{
+	public Node subNode(char letter){
 		if (childList != null)
 			for (Node eachChild : childList)
-				if (eachChild.letter == c)
+				if (eachChild.letter == letter)
 					return eachChild;
 		return null;
 	}
@@ -47,8 +44,7 @@ class TrieTree
 {
 	private Node root;
 
-	public TrieTree()
-	{
+	public TrieTree(){
 		root = new Node(' '); 
 	}
 	
@@ -58,24 +54,23 @@ class TrieTree
 	 * 
 	 */
 	
-	public void add(String word)
-	{
+	public void add(String word){
 		if (search(word) == true) 
 			return;        
-		Node current = root; 
-		for (char ch : word.toCharArray() )
+		Node currentNode = root; 
+		for (char letter : word.toCharArray() )
 		{
-			Node child = current.subNode(ch);
-			if (child != null)
-				current = child;
-			else 
-			{
-				current.childList.add(new Node(ch));
-				current = current.subNode(ch);
+			Node child = currentNode.subNode(letter);
+			if (child == null){
+				currentNode.childList.add(new Node(letter));
+				currentNode = currentNode.subNode(letter);
 			}
-			current.count++;
+			else{
+				currentNode = child;
+			}
+			currentNode.count++;
 		}
-		current.isEnd = true;
+		currentNode.isEnd = true;
 	}
 	
 	/*
@@ -83,19 +78,19 @@ class TrieTree
 	 * search(String word) returns true if string is already inside the tree
 	 * 
 	 */
-	
-	public boolean search(String word)
-	{
-		Node current = root;  
-		for (char ch : word.toCharArray() )
-		{
-			if (current.subNode(ch) == null)
+	public boolean search(String word){
+		Node currentNode = root;  
+		for (char letter : word.toCharArray() ){
+			if (currentNode.subNode(letter) == null){
 				return false;
-			else
-				current = current.subNode(ch);
+			}
+			else{
+				currentNode = currentNode.subNode(letter);
+			}
 		}      
-		if (current.isEnd == true) 
+		if (currentNode.isEnd){ 
 			return true;
+		}
 		return false;
 	}
 	
@@ -105,28 +100,19 @@ class TrieTree
 	 * 
 	 */
 	
-	public void remove(String word)
-	{ 
-		if (search(word) == false)
-        {
-            System.out.println(word +" does not exist in trie\n");
-            return;
-        } 
-		Node current = root;
-		for (char ch : word.toCharArray()) 
-		{ 
-			Node child = current.subNode(ch);
-			if (child.count == 1) 
-			{
-				current.childList.remove(child);
+	public void remove(String word){ 
+		Node currentNode = root;
+		for (char letter : word.toCharArray()) { 
+			Node child = currentNode.subNode(letter);
+			if (child.count == 1) {
+				currentNode.childList.remove(child);
 				return;
 			} 
-			else 
-			{
+			else {
 				child.count--;
-				current = child;
+				currentNode = child;
 			}
 		}
-		current.isEnd = false;
+		currentNode.isEnd = false;
 	}              
 }
