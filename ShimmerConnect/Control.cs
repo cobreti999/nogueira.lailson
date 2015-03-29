@@ -399,6 +399,9 @@ namespace ShimmerConnect
                     if (pProfile.GetIsFilled())
                     {
 
+                        //populate the database
+                        populateDatabase();
+
 
                         System.Threading.Thread.Sleep(500);
                         if (pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3)
@@ -1166,7 +1169,7 @@ namespace ShimmerConnect
                         //openDatabaseConnection();
                         String sensorName = Shimmer3.ChannelProperties[pProfile.GetChannel(i)];
                         if (sensorName.Equals("Low Noise Accelerometer X") || sensorName.Equals("Low Noise Accelerometer Y") || sensorName.Equals("Low Noise Accelerometer Z")){
-                            saveIntoDatabase(sensorName, packet.GetChannel(i).ToString());
+                            saveSensorDataIntoDatabase(sensorName, packet.GetChannel(i).ToString());
                         }
                         /*if (sensorName.Equals("Low Noise Accelerometer X")) || sensorName.Equals("Low Noise Accelerometer Y") || sensorName.Equals("Low Noise Accelerometer Z"))
                             Console.WriteLine(sensorName + ": " + packet.GetChannel(i).ToString());*/
@@ -2866,7 +2869,7 @@ namespace ShimmerConnect
 
         }
 
-        public static void openDatabaseConnection() { 
+        /*public static void openDatabaseConnection() { 
             string cs = @"server=localhost;userid=lailson;
             password=pass;database=sensors";
 
@@ -2889,11 +2892,77 @@ namespace ShimmerConnect
                     conn.Close();
                 }
             }
+        }*/
+
+
+        public void populateDatabase() {
+            string cs = @"server=localhost;userid=lailson;
+            password=pass;database=pac";
+
+            MySqlConnection conn = null;
+
+            try
+            {
+                conn = new MySqlConnection(cs);
+                conn.Open();
+
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.Connection = conn;
+
+                //Populate Patient Information into the database
+                cmd.CommandText = "INSERT INTO patient(firstName) VALUES(@firstName)";
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@firstName", patientFirstNameTextbox.Text);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "INSERT INTO patient(lastName) VALUES(@lastName)";
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@lastName", patientLastNameTextbox.Text);
+                cmd.ExecuteNonQuery();
+
+                //Populate User information into the database
+                cmd.CommandText = "INSERT INTO user(firstName) VALUES(@firstName)";
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@firstName", userFirstNameTextbox.Text);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "INSERT INTO user(lastName) VALUES(@lastName)";
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@lastName", userLastNameTextbox.Text);
+                cmd.ExecuteNonQuery();
+
+                //Populate datatype user information into the database
+                cmd.CommandText = "INSERT INTO datatypeUser(name) VALUES(@name)";
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@name", userTypeTextbox.Text);
+                cmd.ExecuteNonQuery();
+
+                //Populate device location into the database
+                cmd.CommandText = "INSERT INTO dataset(deviceLocation) VALUES(@deviceLocation)";
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@deviceLocation", deviceLocationTextbox.Text);
+                cmd.ExecuteNonQuery();
+               
+               
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Error: {0}", ex.ToString());
+
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                }
+            }
         }
 
-        public static void saveIntoDatabase(String sensorName, String value) {
+
+        public static void saveSensorDataIntoDatabase(String sensorName, String value) {
             string cs = @"server=localhost;userid=lailson;
-            password=pass;database=sensors";
+            password=pass;database=pac";
 
             MySqlConnection conn = null;
 
@@ -2908,21 +2977,33 @@ namespace ShimmerConnect
                 cmd.Connection = conn;
                 if (sensorName.Equals("Low Noise Accelerometer X"))
                 {
-                    cmd.CommandText = "INSERT INTO accelerometer_x_raw(Date,Value) VALUES(@Date, @Value)";
+                    //cmd.CommandText = "INSERT INTO accelerometer_x_raw(Date,Value) VALUES(@Date, @Value)";
+                    cmd.CommandText = "INSERT INTO sensors(accelerometer_x_raw) VALUES(@accelerometer_x_raw)";
+                    cmd.Prepare();
+                    cmd.Parameters.AddWithValue("@accelerometer_x_raw", value);
+                    cmd.ExecuteNonQuery();
                 }
                 else if(sensorName.Equals("Low Noise Accelerometer Y")){
-                    cmd.CommandText = "INSERT INTO accelerometer_y_raw(Date,Value) VALUES(@Date, @Value)";
+                    //cmd.CommandText = "INSERT INTO accelerometer_y_raw(Date,Value) VALUES(@Date, @Value)";
+                    cmd.CommandText = "INSERT INTO sensors(accelerometer_y_raw) VALUES(@accelerometer_y_raw)";
+                    cmd.Prepare();
+                    cmd.Parameters.AddWithValue("@accelerometer_y_raw", value);
+                    cmd.ExecuteNonQuery();
                 }
                 else if (sensorName.Equals("Low Noise Accelerometer Z")){
-                    cmd.CommandText = "INSERT INTO accelerometer_z_raw(Date,Value) VALUES(@Date, @Value)";
+                    //cmd.CommandText = "INSERT INTO accelerometer_z_raw(Date,Value) VALUES(@Date, @Value)";
+                    cmd.CommandText = "INSERT INTO sensors(accelerometer_z_raw) VALUES(@accelerometer_z_raw)";
+                    cmd.Prepare();
+                    cmd.Parameters.AddWithValue("@accelerometer_z_raw", value);
+                    cmd.ExecuteNonQuery();
                 }
-                cmd.Prepare();
-                DateTime time = DateTime.Now;
-                string format = "yyyy-MM-dd hh:mm:ss";
+               // DateTime time = DateTime.Now;
+                //string format = "yyyy-MM-dd hh:mm:ss";
 
-                cmd.Parameters.AddWithValue("@Date", time.ToString(format));
-                cmd.Parameters.AddWithValue("@Value", value);
-                cmd.ExecuteNonQuery();
+                //cmd.Parameters.AddWithValue("@Date", time.ToString(format));
+                //cmd.Parameters.AddWithValue("@Value", value);
+                //cmd.Parameters.AddWithValue("@accelerometer_x_raw", value);
+                //cmd.ExecuteNonQuery();
                 //Console.ReadKey();
             }
             catch (MySqlException ex)
