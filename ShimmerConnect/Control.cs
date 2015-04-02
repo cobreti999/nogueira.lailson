@@ -414,7 +414,7 @@ namespace ShimmerConnect
                             System.Threading.Thread.Sleep(500);
 
                         }
-                        //ShowChannelTextBoxes();
+                        ShowChannelTextBoxes();
                         setOriMatrix = new double[,] { { 1, 0, 0 }, { 0, -1, 0 }, { 0, 0, -1 } };
                         if (pUpdateGraphs)
                         {
@@ -2910,26 +2910,25 @@ namespace ShimmerConnect
                 cmd.Connection = conn;
 
                 //Populate Patient Information into the database
-                cmd.CommandText = "INSERT INTO patient(firstName) VALUES(@firstName)";
+                cmd.CommandText = "INSERT INTO patient(firstName,lastName) VALUES(@firstName, @lastName)";
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@firstName", patientFirstNameTextbox.Text);
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = "INSERT INTO patient(lastName) VALUES(@lastName)";
-                cmd.Prepare();
                 cmd.Parameters.AddWithValue("@lastName", patientLastNameTextbox.Text);
                 cmd.ExecuteNonQuery();
 
                 //Populate User information into the database
-                cmd.CommandText = "INSERT INTO user(firstName) VALUES(@firstName)";
+                cmd = new MySqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = "INSERT INTO user(firstName,lastName) VALUES(@firstName, @lastName)";
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@firstName", userFirstNameTextbox.Text);
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = "INSERT INTO user(lastName) VALUES(@lastName)";
-                cmd.Prepare();
                 cmd.Parameters.AddWithValue("@lastName", userLastNameTextbox.Text);
                 cmd.ExecuteNonQuery();
+
+                //Populate patientAccess information into the database
+                //get patient ID
+                //String getPatientIDSQL = "SELECT FROM patient(f)"
+
 
                 //Populate datatype user information into the database
                 cmd.CommandText = "INSERT INTO datatypeUser(name) VALUES(@name)";
@@ -2959,6 +2958,16 @@ namespace ShimmerConnect
             }
         }
 
+
+        public static int getRandomId() {
+            Random rn = new Random();
+            int maximum = 999;
+            int minimum = 1;
+            int n = maximum - minimum + 1;
+            int i = rn.Next() % n;
+            int randomNum = minimum + i;
+            return randomNum;
+        }
 
         public static void saveSensorDataIntoDatabase(String sensorName, String value) {
             string cs = @"server=localhost;userid=lailson;
