@@ -397,7 +397,8 @@ namespace ShimmerConnect
                 {
                     ShowGraphs();
                 }
-                controlForm.UpdateGraphs(true);
+                //controlForm.UpdateGraphs(true);
+                controlForm.UpdateGraphs(false);
             }
         }
 
