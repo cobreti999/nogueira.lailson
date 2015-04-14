@@ -89,6 +89,7 @@ namespace ShimmerConnect
             this.label9 = new System.Windows.Forms.Label();
             this.deviceLocationTextbox = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.activityTextBox = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -332,6 +333,7 @@ namespace ShimmerConnect
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.activityTextBox);
             this.groupBox4.Controls.Add(this.label9);
             this.groupBox4.Controls.Add(this.deviceLocationTextbox);
             this.groupBox4.Location = new System.Drawing.Point(3, 189);
@@ -339,6 +341,16 @@ namespace ShimmerConnect
             this.groupBox4.Size = new System.Drawing.Size(305, 49);
             this.groupBox4.TabIndex = 37;
             this.groupBox4.TabStop = false;
+            // 
+            // activityTextBox
+            // 
+            this.activityTextBox.AccessibleName = "activity";
+            this.activityTextBox.Enabled = false;
+            this.activityTextBox.Location = new System.Drawing.Point(199, 16);
+            this.activityTextBox.Name = "activityTextBox";
+            this.activityTextBox.Size = new System.Drawing.Size(100, 20);
+            this.activityTextBox.TabIndex = 37;
+            this.activityTextBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged_1);
             // 
             // Control
             // 
@@ -395,5 +407,6 @@ namespace ShimmerConnect
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TextBox deviceLocationTextbox;
         private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.TextBox activityTextBox;
     }
 }

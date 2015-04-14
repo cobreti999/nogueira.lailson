@@ -49,6 +49,9 @@ namespace ShimmerConnect
 {
     public partial class Control : Form
     {
+        private static int numberOfDatabaseSaves = 0;
+        
+        private static String currentActivity = "not moving";
         private volatile bool stopReading = false;
         private volatile bool sensorsChangePending = false;
         private Thread readThread;
@@ -85,6 +88,8 @@ namespace ShimmerConnect
         private MainForm mainForm;
 
         Quaternion quat;
+        static int x=300;
+        static int y;
         private Point[] textBoxLocation = new Point[] {
 #if _PLATFORM_LINUX
             new Point(10, 106),
@@ -119,30 +124,30 @@ namespace ShimmerConnect
             new Point(240, 475)
 #else
             // WINDOWS
-            new Point(10, 97),
-            new Point(107, 97),
-            new Point(204, 97),
-            new Point(10, 137),
-            new Point(107, 137),
-            new Point(204, 137),
-            new Point(10, 177),
-            new Point(107, 177),
-            new Point(204, 177),
-            new Point(10, 217),
-            new Point(107, 217),
-            new Point(204, 217),
-            new Point(10, 257),
-            new Point(107, 257),
-            new Point(204, 257),
-            new Point(10, 297),
-            new Point(107, 297),
-            new Point(204, 297),
-            new Point(10, 337),
-            new Point(107, 337),
-            new Point(204, 337),
-            new Point(10, 377),
-            new Point(107, 377),
-            new Point(204, 377)
+            new Point(x+10, 97),
+            new Point(x+107, 97),
+            new Point(x+204, 97),
+            new Point(x+10, 137),
+            new Point(x+107, 137),
+            new Point(x+204, 137),
+            new Point(x+10, 177),
+            new Point(x+107, 177),
+            new Point(x+204, 177),
+            new Point(x+10, 217),
+            new Point(x+107, 217),
+            new Point(x+204, 217),
+            new Point(x+10, 257),
+            new Point(x+107, 257),
+            new Point(x+204, 257),
+            new Point(x+10, 297),
+            new Point(x+107, 297),
+            new Point(x+204, 297),
+            new Point(x+10, 337),
+            new Point(x+107, 337),
+            new Point(x+204, 337),
+            new Point(x+10, 377),
+            new Point(x+107, 377),
+            new Point(x+204, 377)
 #endif
         };
         private Point[] labelLocation = new Point[] {
@@ -176,30 +181,30 @@ namespace ShimmerConnect
             new Point(242, 416)
 #else
             // WINDOWS
-            new Point(12, 81),
-            new Point(109, 81),
-            new Point(206, 81),
-            new Point(12, 121),
-            new Point(109, 121),
-            new Point(206, 121),
-            new Point(12, 161),
-            new Point(109, 161),
-            new Point(206, 161),
-            new Point(12, 201),
-            new Point(109, 201),
-            new Point(206, 201), 
-            new Point(12, 241),
-            new Point(109, 241),
-            new Point(206, 241),
-            new Point(12, 281),
-            new Point(109, 281),
-            new Point(206, 281),
-            new Point(12, 321),
-            new Point(109, 321),
-            new Point(206, 321),
-            new Point(12, 361),
-            new Point(109, 361),
-            new Point(206, 361)
+            new Point(x+12, 81),
+            new Point(x+109, 81),
+            new Point(x+206, 81),
+            new Point(x+12, 121),
+            new Point(x+109, 121),
+            new Point(x+206, 121),
+            new Point(x+12, 161),
+            new Point(x+109, 161),
+            new Point(x+206, 161),
+            new Point(x+12, 201),
+            new Point(x+109, 201),
+            new Point(x+206, 201), 
+            new Point(x+12, 241),
+            new Point(x+109, 241),
+            new Point(x+206, 241),
+            new Point(x+12, 281),
+            new Point(x+109, 281),
+            new Point(x+206, 281),
+            new Point(x+12, 321),
+            new Point(x+109, 321),
+            new Point(x+206, 321),
+            new Point(x+12, 361),
+            new Point(x+109, 361),
+            new Point(x+206, 361)
 #endif
         };
 
@@ -399,6 +404,7 @@ namespace ShimmerConnect
                     if (pProfile.GetIsFilled())
                     {
 
+                        activityTextBox.Text = currentActivity;
                         //populate the database
                         populateDatabase();
 
@@ -867,6 +873,7 @@ namespace ShimmerConnect
         // For full details see: http://msdn.microsoft.com/en-us/library/ms171728%28VS.80%29.aspx
         private void SetTextChannels(ShimmerDataPacket packet)
         {
+            
             try
             {
                 if (this.channelTextBox[0].InvokeRequired) // all will be in the same thread
@@ -927,6 +934,8 @@ namespace ShimmerConnect
                             // Current channel + next 2 are mag channels
                             //this.extraInfoTextBox.Text = MagHeading((Int16)packet.GetChannel(i),(Int16)packet.GetChannel(i + 1),(Int16)packet.GetChannel(i + 2)).ToString();
                         }
+
+                        
                         
                         if (pUpdateGraphs) 
                         {
@@ -1169,11 +1178,12 @@ namespace ShimmerConnect
                         {
                             pCsvFile.Write(delimiter + packet.GetChannel(i).ToString());
                         }
-                        //SAVE INTO DATABASE
-                        //openDatabaseConnection();
+                        //Save RAW data into database
                         String sensorName = Shimmer3.ChannelProperties[pProfile.GetChannel(i)];
-                        
 
+                        //Console.WriteLine(sensorName + " value: " +  packet.GetChannel(i).ToString());
+
+                        /*
                         if (sensorName.Equals("Low Noise Accelerometer X")) {
                             lowNoiseAccXRaw = packet.GetChannel(i).ToString();
                         }
@@ -1187,8 +1197,18 @@ namespace ShimmerConnect
                         }
                         if (!lowNoiseAccXRaw.Equals("") && !lowNoiseAccYRaw.Equals("") && !lowNoiseAccZRaw.Equals(""))
                         {
-                            saveSensorDataIntoDatabase(lowNoiseAccXRaw, lowNoiseAccYRaw, lowNoiseAccZRaw);
-                        }
+                            Console.WriteLine("tou caindo aqui");
+                            if (verifiyTimeStamp())
+                            {
+                                //Console.WriteLine("tou caindo aqui2");
+                                //saveRAWSensorDataIntoDatabase(lowNoiseAccXRaw, lowNoiseAccYRaw, lowNoiseAccZRaw);
+                            }
+                            //reset the variables
+                            lowNoiseAccXRaw = "";
+                            lowNoiseAccYRaw = "";
+                            lowNoiseAccZRaw = "";
+
+                        }*/
 
                    
                     }
@@ -1208,17 +1228,20 @@ namespace ShimmerConnect
                             // The magnetometer gives a signed 16 bit integer per channel
                             packet.SetChannel(i, ((Int16)packet.GetChannel(i)));
                         }
-                        
-                        
+
                         if (pSaveToFile)
                         {
                             if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.XAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.XLNAccel) && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
                             {
                                 datatemp[0] = (double)packet.GetChannel(i);
+                                //Console.WriteLine("Cal values");
+                                //Console.WriteLine("AccX:" + datatemp[0].ToString());
                             }
                             else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.YAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.YLNAccel) && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
                             {
                                 datatemp[1] = (double)packet.GetChannel(i);
+                                //Console.WriteLine("Cal values");
+                                //Console.WriteLine("AccY:" + datatemp[1].ToString());
                             }
                             else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.ZAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.ZLNAccel) && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
                             {
@@ -1227,6 +1250,12 @@ namespace ShimmerConnect
                                 pCsvFile.Write(delimiter + datatemp[0].ToString());
                                 pCsvFile.Write(delimiter + datatemp[1].ToString());
                                 pCsvFile.Write(delimiter + datatemp[2].ToString());
+                                Console.WriteLine("Cal values"); 
+                                Console.WriteLine("AccX:" + datatemp[0].ToString());
+                                Console.WriteLine("AccY:" + datatemp[1].ToString());
+                                Console.WriteLine("AccZ:" + datatemp[2].ToString());
+
+
                             }
                             else if ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.XWRAccel) && (pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
                             {
@@ -1423,8 +1452,53 @@ namespace ShimmerConnect
                                 }
                             }
                         }
-                    }
 
+
+                        if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.XAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.XLNAccel) && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
+                        {
+                            datatemp[0] = (double)packet.GetChannel(i);
+                        }
+                        else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.YAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.YLNAccel) && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
+                        {
+                            datatemp[1] = (double)packet.GetChannel(i);
+                        }
+                        else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.ZAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.ZLNAccel) && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
+                        {
+                            datatemp[2] = (double)packet.GetChannel(i);
+                            datatemp = calibrateInertialSensorData(datatemp, pProfile.AlignmentMatrixAccel, pProfile.SensitivityMatrixAccel, pProfile.OffsetVectorAccel);
+                         
+                            
+                            String lowNoiseAccXCAL = datatemp[0].ToString();
+                            String lowNoiseAccYCAL = datatemp[1].ToString();
+                            String lowNoiseAccZCAL = datatemp[2].ToString();
+                            if (verifiyTimeStamp()) {
+                                saveCALSensorDataIntoDatabase(lowNoiseAccXCAL, lowNoiseAccYCAL, lowNoiseAccZCAL);
+                                if (numberOfDatabaseSaves % 2 == 0) {
+                                    String currentActivity = calcCurrentActivity();
+                                    Console.WriteLine("CURRENT ACTIVITY: " + currentActivity);
+                                }
+                            }
+
+                        }
+
+
+                        /*Console.WriteLine("Channel ver: " + (int)Shimmer3.ChannelContents.XLNAccel); 
+                        Console.Write("Channel: " + pProfile.GetChannel(i) + " ");
+
+                        Console.WriteLine("version: " + pProfile.GetShimmerVersion()); 
+                        Console.WriteLine("version ver: " + (int)Shimmer.ShimmerVersion.SHIMMER3);
+
+                        Console.WriteLine("SensorName: " + Shimmer3.ChannelProperties[pProfile.GetChannel(i)]);*/ 
+                        /*String sensorName2 = Shimmer3.ChannelProperties[pProfile.GetChannel(i)];
+
+                        Console.WriteLine(sensorName2 + " value: " + packet.GetChannel(i).ToString());
+
+                        double t1 = (double)packet.GetChannel(pProfile.getPacketIndexFromChannelContent((int)Shimmer3.ChannelContents.AlternativeXAccel));
+                        double t2 = (double)packet.GetChannel(pProfile.getPacketIndexFromChannelContent((int)Shimmer3.ChannelContents.XLNAccel));
+                        Console.WriteLine("t1: " + t1);
+                        Console.WriteLine("t2: " + t2);*/
+
+                    } 
 
                         if (pSaveToFile)
                     {
@@ -1437,6 +1511,10 @@ namespace ShimmerConnect
                         }
 
                         pCsvFile.Write("\n");
+                        
+
+
+
                     }
                 }
             }
@@ -1448,6 +1526,8 @@ namespace ShimmerConnect
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        
 
         protected double calibrateU12AdcValue(double uncalibratedData, double offset, double vRefP, double gain)
         {
@@ -2913,6 +2993,9 @@ namespace ShimmerConnect
                 }
             }
         }*/
+        String userID = "";
+        String patientID = "";
+
 
 
         public void populateDatabase() {
@@ -2951,7 +3034,6 @@ namespace ShimmerConnect
                 String getPatientIDStm = @"SELECT id from patient where firstName='" + patientFirstNameTextbox.Text + "' and lastName='" + patientLastNameTextbox.Text + "';" ;
                 cmd = new MySqlCommand(getPatientIDStm, conn);
                 //rdr = cmd.ExecuteReader();
-                String patientID = "";
                 object obj = cmd.ExecuteScalar();
                 if (obj != null && obj != DBNull.Value)
                 {
@@ -2963,7 +3045,6 @@ namespace ShimmerConnect
                 //get user ID
                 String getUserIDStm = @"SELECT id from user where firstName='" + userFirstNameTextbox.Text + "' and lastName='" + userLastNameTextbox.Text + "';";
                 cmd = new MySqlCommand(getUserIDStm, conn);
-                String userID = "";
                 obj = cmd.ExecuteScalar();
                 if (obj != null && obj != DBNull.Value)
                 {
@@ -3034,19 +3115,40 @@ namespace ShimmerConnect
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
                 String getLastTimeStampStm = @"SELECT timestamp from sensors ORDER BY id DESC LIMIT 1;";
-
                 cmd = new MySqlCommand(getLastTimeStampStm, conn);
                 String lastTimeStamp = "";
                 object obj = cmd.ExecuteScalar();
                 if (obj != null && obj != DBNull.Value)
                 {
                     lastTimeStamp = Convert.ToString(obj);
-                }
-                DateTime lastDateTime = Convert.ToDateTime(lastTimeStamp);
 
-                DateTime currentDateTime = DateTime.Now;
-                if (currentDateTime > lastDateTime)
+                    //Console.WriteLine("Query LastTimeStamp: " + lastTimeStamp);
+                    //DateTime lastDateTime = Convert.ToDateTime(lastTimeStamp);
+                    String getLastTimePeriodStm = @"SELECT timeperiod from sensors ORDER BY id DESC LIMIT 1;";
+                    cmd = new MySqlCommand(getLastTimePeriodStm, conn);
+                    String lastTimePeriod = "";
+                    object obj2 = cmd.ExecuteScalar();
+                    if (obj2 != null && obj2 != DBNull.Value)
+                    {
+                        lastTimePeriod = Convert.ToString(obj2);
+                    }
+                    //Console.WriteLine("Query LastTimePeriod: " + lastTimePeriod);
+                    lastTimeStamp = lastTimeStamp.Remove(18);
+                    //Console.WriteLine("LastTimeStamp depois de remover timePeriod: " + lastTimeStamp);
+                    DateTime lastDateTime = Convert.ToDateTime(lastTimeStamp + " " + lastTimePeriod);
+                    DateTime currentDateTime = DateTime.Now;
+                    //currentDateTime = currentDateTime.ChangeTime(currentDateTime, currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second, 0);
+                    currentDateTime = currentDateTime.Date.AddHours(currentDateTime.Hour).AddMinutes(currentDateTime.Minute).AddSeconds(currentDateTime.Second).AddMilliseconds(0);
+                    //Console.Write("LastDate: " + lastDateTime + " miliseconds: " + lastDateTime.Millisecond + " ");
+                    //Console.Write("CurrentDate: " + currentDateTime + " miliseconds: " + currentDateTime.Millisecond + " ");
+                    //Console.WriteLine(currentDateTime > lastDateTime);
+                    if (currentDateTime > lastDateTime)
+                        return true;
+                }
+                //On the first run, obj is null and we must allow the saving
+                else {
                     return true;
+                }
             }
             catch (MySqlException ex)
             {
@@ -3066,7 +3168,7 @@ namespace ShimmerConnect
         }
 
 
-        public static void saveSensorDataIntoDatabase(String lowNoiseAccXRaw, String lowNoiseAccYRaw, String lowNoiseAccZRaw)
+        public static void saveRAWSensorDataIntoDatabase(String lowNoiseAccXRaw, String lowNoiseAccYRaw, String lowNoiseAccZRaw)
         {
             string cs = @"server=localhost;userid=lailson;
             password=pass;database=pac";
@@ -3077,25 +3179,30 @@ namespace ShimmerConnect
             {
                 DateTime time = DateTime.Now;
                 string format = "yyyy-MM-dd hh:mm:ss";
+                string timeperiodformat = "tt";
                 conn = new MySqlConnection(cs);
                 conn.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
                 
-                cmd.CommandText = "INSERT INTO sensors(accelerometer_x_raw, accelerometer_y_raw, accelerometer_z_raw, timestamp ) VALUES(@accelerometer_x_raw, @accelerometer_y_raw, @accelerometer_z_raw, @timestamp )";
+                cmd.CommandText = "INSERT INTO sensors(accelerometer_x_raw, accelerometer_y_raw, accelerometer_z_raw, timestamp, timeperiod ) VALUES(@accelerometer_x_raw, @accelerometer_y_raw, @accelerometer_z_raw, @timestamp, @timeperiod )";
 
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@accelerometer_x_raw", lowNoiseAccXRaw);
                 cmd.Parameters.AddWithValue("@accelerometer_y_raw", lowNoiseAccYRaw);
                 cmd.Parameters.AddWithValue("@accelerometer_z_raw", lowNoiseAccZRaw);
                 cmd.Parameters.AddWithValue("@timestamp", time.ToString(format));
+                cmd.Parameters.AddWithValue("@timeperiod", time.ToString(timeperiodformat));
+
                 cmd.ExecuteNonQuery();
 
-                //reset the variables
+                //Console.WriteLine();
+                //Console.WriteLine("TimeStamp salvo: " + time.ToString(format));
+                /*//reset the variables
                 lowNoiseAccXRaw = "";
                 lowNoiseAccYRaw = "";
-                lowNoiseAccZRaw = "";
+                lowNoiseAccZRaw = "";*/
 
               
             }
@@ -3112,6 +3219,191 @@ namespace ShimmerConnect
                 }
             }
         }
+
+        public static void saveCALSensorDataIntoDatabase(String lowNoiseAccXCAL, String lowNoiseAccYCAL, String lowNoiseAccZCAL)
+        {
+            string cs = @"server=localhost;userid=lailson;
+            password=pass;database=pac";
+
+            MySqlConnection conn = null;
+
+            try
+            {
+                DateTime time = DateTime.Now;
+                string format = "yyyy-MM-dd hh:mm:ss";
+                string timeperiodformat = "tt";
+                conn = new MySqlConnection(cs);
+                conn.Open();
+
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.Connection = conn;
+
+                cmd.CommandText = "INSERT INTO sensors(accelerometer_x_CAL, accelerometer_y_CAL, accelerometer_z_CAL, timestamp, timeperiod ) VALUES(@accelerometer_x_CAL, @accelerometer_y_CAL, @accelerometer_z_CAL, @timestamp, @timeperiod )";
+
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@accelerometer_x_CAL", lowNoiseAccXCAL);
+                cmd.Parameters.AddWithValue("@accelerometer_y_CAL", lowNoiseAccYCAL);
+                cmd.Parameters.AddWithValue("@accelerometer_z_CAL", lowNoiseAccZCAL);
+                cmd.Parameters.AddWithValue("@timestamp", time.ToString(format));
+                cmd.Parameters.AddWithValue("@timeperiod", time.ToString(timeperiodformat));
+
+                cmd.ExecuteNonQuery();
+                numberOfDatabaseSaves++;
+                Console.WriteLine(numberOfDatabaseSaves);
+
+                //Console.WriteLine();
+                //Console.WriteLine("TimeStamp salvo: " + time.ToString(format));
+                /*//reset the variables
+                lowNoiseAccXRaw = "";
+                lowNoiseAccYRaw = "";
+                lowNoiseAccZRaw = "";*/
+
+
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Error: {0}", ex.ToString());
+
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+       public  String calcCurrentActivity() {
+            string cs = @"server=localhost;userid=lailson;
+            password=pass;database=pac";
+
+            MySqlConnection conn = null;
+            MySqlDataReader rdr = null;
+
+            try
+            {
+                conn = new MySqlConnection(cs);
+                conn.Open();
+
+                MySqlCommand cmd = new MySqlCommand();
+                cmd.Connection = conn;
+                String getLastAccXValuesStm = @"SELECT accelerometer_x_CAL from sensors ORDER BY id DESC LIMIT 2;";
+                cmd = new MySqlCommand(getLastAccXValuesStm, conn);
+
+                rdr = cmd.ExecuteReader();
+                double[] values = new double[2];
+                int  i=0;
+                while (rdr.Read())
+                {
+                    values[i] = rdr.GetDouble(0);
+                    //Console.WriteLine(rdr.GetDouble(0));
+                }
+
+                if (rdr != null)
+                {
+                    rdr.Close();
+                }
+
+                //calc Std Deviation
+                double stdDeviation = calcStandardDeviation(values);
+                //Console.WriteLine("stddeviation: " + stdDeviation);
+                if (stdDeviation < 0.1)
+                    currentActivity = "inactive";
+                else
+                    currentActivity = "active";
+                //Show in screen
+                activityTextBox.Text = currentActivity;
+
+               
+
+                //populate DB
+                //Populate activity table
+                cmd = new MySqlCommand();
+                cmd.Connection = conn;
+                cmd.CommandText = "INSERT INTO activity(activity,userId) VALUES(@activity, @userId)";
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@activity", currentActivity);
+                cmd.Parameters.AddWithValue("@userId", userID);
+                cmd.ExecuteNonQuery();
+
+
+                String getActivityIDStm = @"SELECT id from activity where activity='" + currentActivity + "' and userId='" + userID + "';";
+                cmd = new MySqlCommand(getActivityIDStm, conn);
+                object obj = cmd.ExecuteScalar();
+                String activityID = "";
+                if (obj != null && obj != DBNull.Value)
+                {
+                    activityID = Convert.ToString(obj);
+                }
+
+                String getLastTimeStampValuesStm = @"SELECT timestamp from sensors ORDER BY id DESC LIMIT 2;";
+                cmd = new MySqlCommand(getLastTimeStampValuesStm, conn);
+
+                rdr = cmd.ExecuteReader();
+                DateTime[] times = new DateTime[2];
+                i = 0;
+                while (rdr.Read())
+                {
+                    times[i] = rdr.GetDateTime(0);
+                    i++;
+                }
+                if (rdr != null)
+                {
+                    rdr.Close();
+                }
+                DateTime startTime = times[1];
+                DateTime endTime = times[0];
+
+                String getDataSetIDStm = @"SELECT id from dataset where patientId='" + patientID + "' and deviceLocation='" + deviceLocationTextbox.Text + "';";
+                cmd = new MySqlCommand(getActivityIDStm, conn);
+                obj = cmd.ExecuteScalar();
+                String datasetId = "";
+                if (obj != null && obj != DBNull.Value)
+                {
+                    datasetId = Convert.ToString(obj);
+                }
+
+                cmd = new MySqlCommand();
+                cmd.Connection = conn;
+                //Populate activityDataset table
+                cmd.CommandText = "INSERT INTO activityDataset(activityID,startTime, endTime, datasetId) VALUES(@activityID, @startTime, @endTime, @datasetId)";
+                cmd.Prepare();
+                cmd.Parameters.AddWithValue("@activityID", activityID);
+                cmd.Parameters.AddWithValue("@startTime", startTime);
+                cmd.Parameters.AddWithValue("@endTime", endTime);
+                cmd.Parameters.AddWithValue("@datasetId", datasetId);
+
+
+                cmd.ExecuteNonQuery();
+
+
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Error: {0}", ex.ToString());
+
+            }
+            finally
+            {
+                if (rdr != null)
+                {
+                    rdr.Close();
+                }
+                if (conn != null)
+                {
+                    conn.Close();
+                }
+            }
+            return currentActivity;
+        }
+
+       public static double calcStandardDeviation(IEnumerable<double> values)
+       {
+           double avg = values.Average();
+           return Math.Sqrt(values.Average(v => Math.Pow(v - avg, 2)));
+       }
+        
 
         private void label2_Click(object sender, EventArgs e)
         {
@@ -3172,6 +3464,13 @@ namespace ShimmerConnect
         {
 
         }
+
+        private void textBox1_TextChanged_1(object sender, EventArgs e)
+        {
+           
+        }
+
+
 
 
     }
