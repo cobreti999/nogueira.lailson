@@ -79,6 +79,10 @@ namespace ShimmerConnect
             this.label3 = new System.Windows.Forms.Label();
             this.patientLabel = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.userPasswordTextbox = new System.Windows.Forms.TextBox();
+            this.userNameTextbox = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.userTypeTextbox = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.userLastNameTextbox = new System.Windows.Forms.TextBox();
@@ -89,6 +93,7 @@ namespace ShimmerConnect
             this.label9 = new System.Windows.Forms.Label();
             this.deviceLocationTextbox = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.activityTextBox = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -98,7 +103,7 @@ namespace ShimmerConnect
             // 
             // btnStop
             // 
-            this.btnStop.Location = new System.Drawing.Point(163, 51);
+            this.btnStop.Location = new System.Drawing.Point(234, 51);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(137, 23);
             this.btnStop.TabIndex = 28;
@@ -108,7 +113,7 @@ namespace ShimmerConnect
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(8, 51);
+            this.btnStart.Location = new System.Drawing.Point(12, 51);
             this.btnStart.Name = "btnStart";
             this.btnStart.Size = new System.Drawing.Size(137, 23);
             this.btnStart.TabIndex = 27;
@@ -118,7 +123,7 @@ namespace ShimmerConnect
             // 
             // btnDisconnect
             // 
-            this.btnDisconnect.Location = new System.Drawing.Point(215, 22);
+            this.btnDisconnect.Location = new System.Drawing.Point(296, 22);
             this.btnDisconnect.Name = "btnDisconnect";
             this.btnDisconnect.Size = new System.Drawing.Size(75, 23);
             this.btnDisconnect.TabIndex = 26;
@@ -128,7 +133,7 @@ namespace ShimmerConnect
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(6, 22);
+            this.btnConnect.Location = new System.Drawing.Point(42, 24);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(75, 23);
             this.btnConnect.TabIndex = 25;
@@ -139,7 +144,7 @@ namespace ShimmerConnect
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(103, 10);
+            this.label1.Location = new System.Drawing.Point(162, 8);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(85, 13);
             this.label1.TabIndex = 24;
@@ -149,7 +154,7 @@ namespace ShimmerConnect
             // cmbComPortSelect
             // 
             this.cmbComPortSelect.FormattingEnabled = true;
-            this.cmbComPortSelect.Location = new System.Drawing.Point(87, 24);
+            this.cmbComPortSelect.Location = new System.Drawing.Point(141, 24);
             this.cmbComPortSelect.Name = "cmbComPortSelect";
             this.cmbComPortSelect.Size = new System.Drawing.Size(121, 21);
             this.cmbComPortSelect.TabIndex = 23;
@@ -171,7 +176,7 @@ namespace ShimmerConnect
             this.groupBox1.Controls.Add(this.btnDisconnect);
             this.groupBox1.Location = new System.Drawing.Point(3, 244);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(305, 84);
+            this.groupBox1.Size = new System.Drawing.Size(390, 84);
             this.groupBox1.TabIndex = 32;
             this.groupBox1.TabStop = false;
             this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
@@ -185,13 +190,13 @@ namespace ShimmerConnect
             this.groupBox2.Controls.Add(this.patientLabel);
             this.groupBox2.Location = new System.Drawing.Point(3, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(305, 68);
+            this.groupBox2.Size = new System.Drawing.Size(390, 68);
             this.groupBox2.TabIndex = 33;
             this.groupBox2.TabStop = false;
             // 
             // patientLastNameTextbox
             // 
-            this.patientLastNameTextbox.Location = new System.Drawing.Point(220, 38);
+            this.patientLastNameTextbox.Location = new System.Drawing.Point(296, 38);
             this.patientLastNameTextbox.Name = "patientLastNameTextbox";
             this.patientLastNameTextbox.Size = new System.Drawing.Size(81, 20);
             this.patientLastNameTextbox.TabIndex = 28;
@@ -200,7 +205,7 @@ namespace ShimmerConnect
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(162, 38);
+            this.label4.Location = new System.Drawing.Point(231, 38);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(53, 13);
             this.label4.TabIndex = 27;
@@ -228,7 +233,7 @@ namespace ShimmerConnect
             // patientLabel
             // 
             this.patientLabel.AutoSize = true;
-            this.patientLabel.Location = new System.Drawing.Point(118, 16);
+            this.patientLabel.Location = new System.Drawing.Point(167, 16);
             this.patientLabel.Name = "patientLabel";
             this.patientLabel.Size = new System.Drawing.Size(61, 13);
             this.patientLabel.TabIndex = 24;
@@ -238,6 +243,10 @@ namespace ShimmerConnect
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.label11);
+            this.groupBox3.Controls.Add(this.userPasswordTextbox);
+            this.groupBox3.Controls.Add(this.userNameTextbox);
+            this.groupBox3.Controls.Add(this.label10);
             this.groupBox3.Controls.Add(this.userTypeTextbox);
             this.groupBox3.Controls.Add(this.label8);
             this.groupBox3.Controls.Add(this.userLastNameTextbox);
@@ -247,13 +256,46 @@ namespace ShimmerConnect
             this.groupBox3.Controls.Add(this.label7);
             this.groupBox3.Location = new System.Drawing.Point(3, 86);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(305, 97);
+            this.groupBox3.Size = new System.Drawing.Size(390, 97);
             this.groupBox3.TabIndex = 34;
             this.groupBox3.TabStop = false;
             // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(138, 72);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(53, 13);
+            this.label11.TabIndex = 38;
+            this.label11.Text = "Password";
+            this.label11.Click += new System.EventHandler(this.label11_Click);
+            // 
+            // userPasswordTextbox
+            // 
+            this.userPasswordTextbox.Location = new System.Drawing.Point(198, 69);
+            this.userPasswordTextbox.Name = "userPasswordTextbox";
+            this.userPasswordTextbox.Size = new System.Drawing.Size(55, 20);
+            this.userPasswordTextbox.TabIndex = 39;
+            // 
+            // userNameTextbox
+            // 
+            this.userNameTextbox.Location = new System.Drawing.Point(65, 72);
+            this.userNameTextbox.Name = "userNameTextbox";
+            this.userNameTextbox.Size = new System.Drawing.Size(52, 20);
+            this.userNameTextbox.TabIndex = 38;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(9, 72);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(55, 13);
+            this.label10.TabIndex = 31;
+            this.label10.Text = "Username";
+            // 
             // userTypeTextbox
             // 
-            this.userTypeTextbox.Location = new System.Drawing.Point(65, 72);
+            this.userTypeTextbox.Location = new System.Drawing.Point(296, 72);
             this.userTypeTextbox.Name = "userTypeTextbox";
             this.userTypeTextbox.Size = new System.Drawing.Size(81, 20);
             this.userTypeTextbox.TabIndex = 30;
@@ -262,7 +304,7 @@ namespace ShimmerConnect
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(9, 72);
+            this.label8.Location = new System.Drawing.Point(259, 72);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(31, 13);
             this.label8.TabIndex = 29;
@@ -306,7 +348,7 @@ namespace ShimmerConnect
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(118, 16);
+            this.label7.Location = new System.Drawing.Point(160, 16);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(50, 13);
             this.label7.TabIndex = 24;
@@ -322,6 +364,7 @@ namespace ShimmerConnect
             this.label9.Size = new System.Drawing.Size(85, 13);
             this.label9.TabIndex = 35;
             this.label9.Text = "Device Location";
+            this.label9.Click += new System.EventHandler(this.label9_Click);
             // 
             // deviceLocationTextbox
             // 
@@ -333,22 +376,32 @@ namespace ShimmerConnect
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.label2);
             this.groupBox4.Controls.Add(this.activityTextBox);
             this.groupBox4.Controls.Add(this.label9);
             this.groupBox4.Controls.Add(this.deviceLocationTextbox);
             this.groupBox4.Location = new System.Drawing.Point(3, 189);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(305, 49);
+            this.groupBox4.Size = new System.Drawing.Size(390, 49);
             this.groupBox4.TabIndex = 37;
             this.groupBox4.TabStop = false;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(249, 16);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(41, 13);
+            this.label2.TabIndex = 38;
+            this.label2.Text = "Activity";
             // 
             // activityTextBox
             // 
             this.activityTextBox.AccessibleName = "activity";
             this.activityTextBox.Enabled = false;
-            this.activityTextBox.Location = new System.Drawing.Point(199, 16);
+            this.activityTextBox.Location = new System.Drawing.Point(312, 13);
             this.activityTextBox.Name = "activityTextBox";
-            this.activityTextBox.Size = new System.Drawing.Size(100, 20);
+            this.activityTextBox.Size = new System.Drawing.Size(65, 20);
             this.activityTextBox.TabIndex = 37;
             this.activityTextBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged_1);
             // 
@@ -358,7 +411,7 @@ namespace ShimmerConnect
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(315, 335);
+            this.ClientSize = new System.Drawing.Size(415, 335);
             this.ControlBox = false;
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
@@ -408,5 +461,10 @@ namespace ShimmerConnect
         private System.Windows.Forms.TextBox deviceLocationTextbox;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.TextBox activityTextBox;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TextBox userPasswordTextbox;
+        private System.Windows.Forms.TextBox userNameTextbox;
+        private System.Windows.Forms.Label label10;
     }
 }

@@ -50,8 +50,21 @@ namespace ShimmerConnect
     public partial class Control : Form
     {
         private static int numberOfDatabaseSaves = 0;
+        /*string cs = @"server=localhost;userid=lailson;
+            password=pass;database=pac";*/
         
-        private static String currentActivity = "not moving";
+        //HEROKU INFO
+        //user 5aca4f53
+        //password bd6dafea529f47
+        //url
+
+        //AZURE
+        string cs = @"server=us-cdbr-azure-west-a.cloudapp.net;userid=b682c0769dbd11;
+            password=696d3bff;database=as_2a1e9dcfd6f405c";
+        //string cs = @"Database=as_2a1e9dcfd6f405c;Data Source=us-cdbr-azure-west-a.cloudapp.net;User Id=b682c0769dbd11;Password=696d3bff";
+        String userID = "";
+        String patientID = "";
+        private static String currentActivity = "inactive";
         private volatile bool stopReading = false;
         private volatile bool sensorsChangePending = false;
         private Thread readThread;
@@ -88,7 +101,7 @@ namespace ShimmerConnect
         private MainForm mainForm;
 
         Quaternion quat;
-        static int x=300;
+        static int x=400;
         static int y;
         private Point[] textBoxLocation = new Point[] {
 #if _PLATFORM_LINUX
@@ -583,7 +596,6 @@ namespace ShimmerConnect
                             }
                             else if (pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3)
                             {
-                                Console.WriteLine("AHUEHUAHEUAHEUAHEUAHEU");
                                 for (i = 0; i < 8; i++)
                                 {
                                     // get Sampling rate, accel range, config setup byte0, num chans and buffer size
@@ -820,16 +832,16 @@ namespace ShimmerConnect
                 catch (System.TimeoutException)
                 {
                     // do nothing
-                   /* if(serialPort1.IsOpen && isStreaming){
-                        MessageBox.Show("Read thread is expecting data but is not receiving any. Disconnecting.", Shimmer.ApplicationName,                          
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        if (serialPort1.IsOpen)
-                        {
-                            stopReading = true;
-                        }
-                        isStreaming = false;
+                    /* if(serialPort1.IsOpen && isStreaming){
+                         MessageBox.Show("Read thread is expecting data but is not receiving any. Disconnecting.", Shimmer.ApplicationName,                          
+                         MessageBoxButtons.OK, MessageBoxIcon.Error);
+                         if (serialPort1.IsOpen)
+                         {
+                             stopReading = true;
+                         }
+                         isStreaming = false;
                         
-                    }*/
+                     }*/
                 }
                 catch (System.InvalidOperationException)
                 {
@@ -1250,10 +1262,10 @@ namespace ShimmerConnect
                                 pCsvFile.Write(delimiter + datatemp[0].ToString());
                                 pCsvFile.Write(delimiter + datatemp[1].ToString());
                                 pCsvFile.Write(delimiter + datatemp[2].ToString());
-                                Console.WriteLine("Cal values"); 
+                                /*Console.WriteLine("Cal values"); 
                                 Console.WriteLine("AccX:" + datatemp[0].ToString());
                                 Console.WriteLine("AccY:" + datatemp[1].ToString());
-                                Console.WriteLine("AccZ:" + datatemp[2].ToString());
+                                Console.WriteLine("AccZ:" + datatemp[2].ToString());*/
 
 
                             }
@@ -1473,30 +1485,17 @@ namespace ShimmerConnect
                             String lowNoiseAccZCAL = datatemp[2].ToString();
                             if (verifiyTimeStamp()) {
                                 saveCALSensorDataIntoDatabase(lowNoiseAccXCAL, lowNoiseAccYCAL, lowNoiseAccZCAL);
+                                Console.WriteLine("Database writing: " + numberOfDatabaseSaves);
                                 if (numberOfDatabaseSaves % 2 == 0) {
                                     String currentActivity = calcCurrentActivity();
-                                    Console.WriteLine("CURRENT ACTIVITY: " + currentActivity);
+                                    //Console.WriteLine("CURRENT ACTIVITY: " + currentActivity);
                                 }
                             }
 
                         }
 
 
-                        /*Console.WriteLine("Channel ver: " + (int)Shimmer3.ChannelContents.XLNAccel); 
-                        Console.Write("Channel: " + pProfile.GetChannel(i) + " ");
-
-                        Console.WriteLine("version: " + pProfile.GetShimmerVersion()); 
-                        Console.WriteLine("version ver: " + (int)Shimmer.ShimmerVersion.SHIMMER3);
-
-                        Console.WriteLine("SensorName: " + Shimmer3.ChannelProperties[pProfile.GetChannel(i)]);*/ 
-                        /*String sensorName2 = Shimmer3.ChannelProperties[pProfile.GetChannel(i)];
-
-                        Console.WriteLine(sensorName2 + " value: " + packet.GetChannel(i).ToString());
-
-                        double t1 = (double)packet.GetChannel(pProfile.getPacketIndexFromChannelContent((int)Shimmer3.ChannelContents.AlternativeXAccel));
-                        double t2 = (double)packet.GetChannel(pProfile.getPacketIndexFromChannelContent((int)Shimmer3.ChannelContents.XLNAccel));
-                        Console.WriteLine("t1: " + t1);
-                        Console.WriteLine("t2: " + t2);*/
+                   
 
                     } 
 
@@ -2969,38 +2968,13 @@ namespace ShimmerConnect
 
         }
 
-        /*public static void openDatabaseConnection() { 
-            string cs = @"server=localhost;userid=lailson;
-            password=pass;database=sensors";
-
-            MySqlConnection conn = null;
-
-            try
-            {
-                conn = new MySqlConnection(cs);
-                conn.Open();
-            }
-            catch (MySqlException ex)
-            {
-                Console.WriteLine("Error: {0}", ex.ToString());
-
-            }
-            finally
-            {
-                if (conn != null)
-                {
-                    conn.Close();
-                }
-            }
-        }*/
-        String userID = "";
-        String patientID = "";
+      
+        
 
 
 
         public void populateDatabase() {
-            string cs = @"server=localhost;userid=lailson;
-            password=pass;database=pac";
+            
 
             MySqlConnection conn = null;
             MySqlDataReader rdr = null;
@@ -3023,10 +2997,12 @@ namespace ShimmerConnect
                 //Populate User information into the database
                 cmd = new MySqlCommand();
                 cmd.Connection = conn;
-                cmd.CommandText = "INSERT INTO user(firstName,lastName) VALUES(@firstName, @lastName)";
+                cmd.CommandText = "INSERT INTO user(firstName,lastName, userName, password) VALUES(@firstName, @lastName, @userName, @password)";
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@firstName", userFirstNameTextbox.Text);
                 cmd.Parameters.AddWithValue("@lastName", userLastNameTextbox.Text);
+                cmd.Parameters.AddWithValue("@userName", userNameTextbox.Text);
+                cmd.Parameters.AddWithValue("@password", userPasswordTextbox.Text);
                 cmd.ExecuteNonQuery();
 
                 //Populate patientAccess information into the database
@@ -3050,7 +3026,7 @@ namespace ShimmerConnect
                 {
                     userID = Convert.ToString(obj);
                 }
-                Console.WriteLine("imprimindo userID: " + userID);
+                //Console.WriteLine("imprimindo userID: " + userID);
                 /*rdr = cmd.ExecuteReader();
                 String userID = rdr.GetString(0);*/
 
@@ -3101,10 +3077,11 @@ namespace ShimmerConnect
             }
         }
 
+        DateTime currentDateTime = new DateTime();
+
         public Boolean verifiyTimeStamp()
         {
-            string cs = @"server=localhost;userid=lailson;
-            password=pass;database=pac";
+            
 
             MySqlConnection conn = null;
             try
@@ -3136,7 +3113,7 @@ namespace ShimmerConnect
                     lastTimeStamp = lastTimeStamp.Remove(18);
                     //Console.WriteLine("LastTimeStamp depois de remover timePeriod: " + lastTimeStamp);
                     DateTime lastDateTime = Convert.ToDateTime(lastTimeStamp + " " + lastTimePeriod);
-                    DateTime currentDateTime = DateTime.Now;
+                    currentDateTime = DateTime.Now;
                     //currentDateTime = currentDateTime.ChangeTime(currentDateTime, currentDateTime.Hour, currentDateTime.Minute, currentDateTime.Second, 0);
                     currentDateTime = currentDateTime.Date.AddHours(currentDateTime.Hour).AddMinutes(currentDateTime.Minute).AddSeconds(currentDateTime.Second).AddMilliseconds(0);
                     //Console.Write("LastDate: " + lastDateTime + " miliseconds: " + lastDateTime.Millisecond + " ");
@@ -3168,10 +3145,9 @@ namespace ShimmerConnect
         }
 
 
-        public static void saveRAWSensorDataIntoDatabase(String lowNoiseAccXRaw, String lowNoiseAccYRaw, String lowNoiseAccZRaw)
+        public void saveRAWSensorDataIntoDatabase(String lowNoiseAccXRaw, String lowNoiseAccYRaw, String lowNoiseAccZRaw)
         {
-            string cs = @"server=localhost;userid=lailson;
-            password=pass;database=pac";
+            
 
             MySqlConnection conn = null;
 
@@ -3185,8 +3161,8 @@ namespace ShimmerConnect
 
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
-                
-                cmd.CommandText = "INSERT INTO sensors(accelerometer_x_raw, accelerometer_y_raw, accelerometer_z_raw, timestamp, timeperiod ) VALUES(@accelerometer_x_raw, @accelerometer_y_raw, @accelerometer_z_raw, @timestamp, @timeperiod )";
+
+                cmd.CommandText = "INSERT INTO sensors(accelerometer_x_raw, accelerometer_y_raw, accelerometer_z_raw, timestamp, timeperiod, patientID ) VALUES(@accelerometer_x_raw, @accelerometer_y_raw, @accelerometer_z_raw, @timestamp, @timeperiod, @patientID )";
 
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@accelerometer_x_raw", lowNoiseAccXRaw);
@@ -3194,6 +3170,7 @@ namespace ShimmerConnect
                 cmd.Parameters.AddWithValue("@accelerometer_z_raw", lowNoiseAccZRaw);
                 cmd.Parameters.AddWithValue("@timestamp", time.ToString(format));
                 cmd.Parameters.AddWithValue("@timeperiod", time.ToString(timeperiodformat));
+                cmd.Parameters.AddWithValue("@patientID", patientID);
 
                 cmd.ExecuteNonQuery();
 
@@ -3220,16 +3197,15 @@ namespace ShimmerConnect
             }
         }
 
-        public static void saveCALSensorDataIntoDatabase(String lowNoiseAccXCAL, String lowNoiseAccYCAL, String lowNoiseAccZCAL)
+        public void saveCALSensorDataIntoDatabase(String lowNoiseAccXCAL, String lowNoiseAccYCAL, String lowNoiseAccZCAL)
         {
-            string cs = @"server=localhost;userid=lailson;
-            password=pass;database=pac";
+            
 
             MySqlConnection conn = null;
 
             try
             {
-                DateTime time = DateTime.Now;
+                //DateTime time = DateTime.Now;
                 string format = "yyyy-MM-dd hh:mm:ss";
                 string timeperiodformat = "tt";
                 conn = new MySqlConnection(cs);
@@ -3238,18 +3214,19 @@ namespace ShimmerConnect
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
 
-                cmd.CommandText = "INSERT INTO sensors(accelerometer_x_CAL, accelerometer_y_CAL, accelerometer_z_CAL, timestamp, timeperiod ) VALUES(@accelerometer_x_CAL, @accelerometer_y_CAL, @accelerometer_z_CAL, @timestamp, @timeperiod )";
+                cmd.CommandText = "INSERT INTO sensors(accelerometer_x_CAL, accelerometer_y_CAL, accelerometer_z_CAL, timestamp, timeperiod, patientID ) VALUES(@accelerometer_x_CAL, @accelerometer_y_CAL, @accelerometer_z_CAL, @timestamp, @timeperiod, @patientID )";
 
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@accelerometer_x_CAL", lowNoiseAccXCAL);
                 cmd.Parameters.AddWithValue("@accelerometer_y_CAL", lowNoiseAccYCAL);
                 cmd.Parameters.AddWithValue("@accelerometer_z_CAL", lowNoiseAccZCAL);
-                cmd.Parameters.AddWithValue("@timestamp", time.ToString(format));
-                cmd.Parameters.AddWithValue("@timeperiod", time.ToString(timeperiodformat));
+                cmd.Parameters.AddWithValue("@timestamp", currentDateTime.ToString(format));
+                cmd.Parameters.AddWithValue("@timeperiod", currentDateTime.ToString(timeperiodformat));
+                cmd.Parameters.AddWithValue("@patientID", patientID);
 
                 cmd.ExecuteNonQuery();
                 numberOfDatabaseSaves++;
-                Console.WriteLine(numberOfDatabaseSaves);
+                //Console.WriteLine(numberOfDatabaseSaves);
 
                 //Console.WriteLine();
                 //Console.WriteLine("TimeStamp salvo: " + time.ToString(format));
@@ -3275,9 +3252,7 @@ namespace ShimmerConnect
         }
 
        public  String calcCurrentActivity() {
-            string cs = @"server=localhost;userid=lailson;
-            password=pass;database=pac";
-
+            
             MySqlConnection conn = null;
             MySqlDataReader rdr = null;
 
@@ -3307,16 +3282,16 @@ namespace ShimmerConnect
 
                 //calc Std Deviation
                 double stdDeviation = calcStandardDeviation(values);
-                //Console.WriteLine("stddeviation: " + stdDeviation);
+                Console.WriteLine("stddeviation: " + stdDeviation);
                 if (stdDeviation < 0.1)
                     currentActivity = "inactive";
                 else
                     currentActivity = "active";
                 //Show in screen
                 activityTextBox.Text = currentActivity;
-
+                Console.WriteLine(currentActivity);
                
-
+                /*
                 //populate DB
                 //Populate activity table
                 cmd = new MySqlCommand();
@@ -3325,9 +3300,9 @@ namespace ShimmerConnect
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@activity", currentActivity);
                 cmd.Parameters.AddWithValue("@userId", userID);
-                cmd.ExecuteNonQuery();
+                cmd.ExecuteNonQuery();*/
 
-
+                /*
                 String getActivityIDStm = @"SELECT id from activity where activity='" + currentActivity + "' and userId='" + userID + "';";
                 cmd = new MySqlCommand(getActivityIDStm, conn);
                 object obj = cmd.ExecuteScalar();
@@ -3335,7 +3310,7 @@ namespace ShimmerConnect
                 if (obj != null && obj != DBNull.Value)
                 {
                     activityID = Convert.ToString(obj);
-                }
+                }*/
 
                 String getLastTimeStampValuesStm = @"SELECT timestamp from sensors ORDER BY id DESC LIMIT 2;";
                 cmd = new MySqlCommand(getLastTimeStampValuesStm, conn);
@@ -3355,9 +3330,10 @@ namespace ShimmerConnect
                 DateTime startTime = times[1];
                 DateTime endTime = times[0];
 
+
                 String getDataSetIDStm = @"SELECT id from dataset where patientId='" + patientID + "' and deviceLocation='" + deviceLocationTextbox.Text + "';";
-                cmd = new MySqlCommand(getActivityIDStm, conn);
-                obj = cmd.ExecuteScalar();
+                cmd = new MySqlCommand(getDataSetIDStm, conn);
+                object obj = cmd.ExecuteScalar();
                 String datasetId = "";
                 if (obj != null && obj != DBNull.Value)
                 {
@@ -3367,9 +3343,9 @@ namespace ShimmerConnect
                 cmd = new MySqlCommand();
                 cmd.Connection = conn;
                 //Populate activityDataset table
-                cmd.CommandText = "INSERT INTO activityDataset(activityID,startTime, endTime, datasetId) VALUES(@activityID, @startTime, @endTime, @datasetId)";
+                cmd.CommandText = "INSERT INTO activityDataset(activity,startTime, endTime, datasetId ) VALUES(@activity, @startTime, @endTime, @datasetId)";
                 cmd.Prepare();
-                cmd.Parameters.AddWithValue("@activityID", activityID);
+                cmd.Parameters.AddWithValue("@activity", currentActivity);
                 cmd.Parameters.AddWithValue("@startTime", startTime);
                 cmd.Parameters.AddWithValue("@endTime", endTime);
                 cmd.Parameters.AddWithValue("@datasetId", datasetId);
@@ -3468,6 +3444,16 @@ namespace ShimmerConnect
         private void textBox1_TextChanged_1(object sender, EventArgs e)
         {
            
+        }
+
+        private void label9_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label11_Click(object sender, EventArgs e)
+        {
+
         }
 
 

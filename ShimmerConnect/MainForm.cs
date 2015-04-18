@@ -44,7 +44,7 @@ using System.Windows.Forms;
 namespace ShimmerConnect
 {
     public partial class MainForm : Form
-    {
+    {   
         public List<GraphForm> channelPlot = new List<GraphForm>();
         public StreamWriter csvFile;
         public ShimmerProfile profile;
@@ -168,7 +168,7 @@ namespace ShimmerConnect
             */
 			
             InitializeComponent();
-			this.Text = Shimmer.ApplicationName + 'V' + versionNumber;
+            this.Text = "Activity Recognition v1.0";//Shimmer.ApplicationName + 'V' + versionNumber;
             tsStatusLabel.Text = "";
             profile = new ShimmerProfile();
             controlForm = new Control(profile, channelPlot, saveToCSVToolStripMenuItem.Checked,
