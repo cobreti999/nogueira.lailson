@@ -52,15 +52,17 @@ namespace ShimmerConnect
         private static int numberOfDatabaseSaves = 0;
         /*string cs = @"server=localhost;userid=lailson;
             password=pass;database=pac";*/
+        string cs = @"server=us-cdbr-azure-west-a.cloudapp.net;userid=b682c0769dbd11;
+            password=696d3bff;database=as_2a1e9dcfd6f405c";
         
         //HEROKU INFO
         //user 5aca4f53
         //password bd6dafea529f47
         //url
 
-        //AZURE
-        string cs = @"server=us-cdbr-azure-west-a.cloudapp.net;userid=b682c0769dbd11;
-            password=696d3bff;database=as_2a1e9dcfd6f405c";
+        //AZURE usar primeira linha
+        /*string cs = @"server=us-cdbr-azure-west-a.cloudapp.net;userid=b682c0769dbd11;
+            password=696d3bff;database=as_2a1e9dcfd6f405c";*/
         //string cs = @"Database=as_2a1e9dcfd6f405c;Data Source=us-cdbr-azure-west-a.cloudapp.net;User Id=b682c0769dbd11;Password=696d3bff";
         String userID = "";
         String patientID = "";
@@ -354,6 +356,24 @@ namespace ShimmerConnect
                 btnStart.Enabled = true;
                 btnStop.Enabled = true;
                 cmbComPortSelect.Enabled = false;
+
+                /*
+                //teste doido
+                try
+                {
+                    conn = new MySqlConnection(cs);
+                    conn.Open();
+                }
+                catch (MySqlException ex)
+                {
+                    Console.WriteLine("Error: {0}", ex.ToString());
+                }
+
+                //populate the database
+                populateDatabase();*/
+
+
+
             }
             catch
             {
@@ -385,6 +405,10 @@ namespace ShimmerConnect
             btnStop.Enabled = false;
             btnConnect.Enabled = true;
             cmbComPortSelect.Enabled = true;
+            if (conn != null)
+                {
+                    conn.Close();
+                }
             
         }
 
@@ -405,6 +429,9 @@ namespace ShimmerConnect
             }
         }
 
+
+
+
         private void btnStart_Click(object sender, EventArgs e)
         {
             if (!patientFirstNameTextbox.Text.Equals("") || !patientLastNameTextbox.Text.Equals("") ||
@@ -418,6 +445,19 @@ namespace ShimmerConnect
                     {
 
                         activityTextBox.Text = currentActivity;
+            
+            
+
+            try
+            {
+                conn = new MySqlConnection(cs);
+                conn.Open();
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine("Error: {0}", ex.ToString());
+            }
+        
                         //populate the database
                         populateDatabase();
 
@@ -491,6 +531,7 @@ namespace ShimmerConnect
                 {
                     serialPort1.ReadByte();
                 }
+                
             }
             else
                 MessageBox.Show("No serial port is open", Shimmer.ApplicationName,
@@ -871,6 +912,7 @@ namespace ShimmerConnect
         String lowNoiseAccXRaw = "";
         String lowNoiseAccYRaw = "";
         String lowNoiseAccZRaw = "";
+        int j = 0;
 
         // This method demonstrates a pattern for making thread-safe
         // calls on a Windows Forms control. 
@@ -1191,7 +1233,7 @@ namespace ShimmerConnect
                             pCsvFile.Write(delimiter + packet.GetChannel(i).ToString());
                         }
                         //Save RAW data into database
-                        String sensorName = Shimmer3.ChannelProperties[pProfile.GetChannel(i)];
+                        //String sensorName = Shimmer3.ChannelProperties[pProfile.GetChannel(i)];
 
                         //Console.WriteLine(sensorName + " value: " +  packet.GetChannel(i).ToString());
 
@@ -1478,28 +1520,40 @@ namespace ShimmerConnect
                         {
                             datatemp[2] = (double)packet.GetChannel(i);
                             datatemp = calibrateInertialSensorData(datatemp, pProfile.AlignmentMatrixAccel, pProfile.SensitivityMatrixAccel, pProfile.OffsetVectorAccel);
-                         
-                            
+
+
                             String lowNoiseAccXCAL = datatemp[0].ToString();
                             String lowNoiseAccYCAL = datatemp[1].ToString();
                             String lowNoiseAccZCAL = datatemp[2].ToString();
-                            if (verifiyTimeStamp()) {
+                            
+                                //if (verifiyTimeStamp())
+                                //{
+                            //Console.WriteLine("pj: " + j);
+                            if (j % 50 != 0)
+                            {
+                                j++;
+                                continue;
+                            }
+                            else
+                            {
+                                //Console.WriteLine("j: " + j);
+                                j++;
+                                currentDateTime = DateTime.Now;
+                                currentDateTime = currentDateTime.Date.AddHours(currentDateTime.Hour).AddMinutes(currentDateTime.Minute).AddSeconds(currentDateTime.Second).AddMilliseconds(0);
+         
                                 saveCALSensorDataIntoDatabase(lowNoiseAccXCAL, lowNoiseAccYCAL, lowNoiseAccZCAL);
-                                Console.WriteLine("Database writing: " + numberOfDatabaseSaves);
-                                if (numberOfDatabaseSaves % 2 == 0) {
+                                //Console.WriteLine("Database writing: " + numberOfDatabaseSaves);
+                                if (numberOfDatabaseSaves % 2 == 0)
+                                {
                                     String currentActivity = calcCurrentActivity();
                                     //Console.WriteLine("CURRENT ACTIVITY: " + currentActivity);
                                 }
+                                //}
                             }
-
-                        }
-
-
-                   
-
-                    } 
-
-                        if (pSaveToFile)
+                            
+                        }                                        
+                    } //end for 
+                    if (pSaveToFile)
                     {
                         if (pProfile.enable3DOrientation == true)
                         {
@@ -2968,21 +3022,22 @@ namespace ShimmerConnect
 
         }
 
-      
-        
 
 
+
+        MySqlConnection conn = null;
+        MySqlDataReader rdr = null;
 
         public void populateDatabase() {
             
 
-            MySqlConnection conn = null;
-            MySqlDataReader rdr = null;
+            /*MySqlConnection conn = null;
+            MySqlDataReader rdr = null;*/
 
             try
             {
-                conn = new MySqlConnection(cs);
-                conn.Open();
+                //conn = new MySqlConnection(cs);
+                //conn.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
@@ -3070,24 +3125,25 @@ namespace ShimmerConnect
                 {
                     rdr.Close();
                 }
-                if (conn != null)
+                /*if (conn != null)
                 {
                     conn.Close();
-                }
+                }*/
             }
         }
 
         DateTime currentDateTime = new DateTime();
+                  
 
         public Boolean verifiyTimeStamp()
         {
             
 
-            MySqlConnection conn = null;
+            //MySqlConnection conn = null;
             try
             {
-                conn = new MySqlConnection(cs);
-                conn.Open();
+                //conn = new MySqlConnection(cs);
+                //conn.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
@@ -3130,15 +3186,28 @@ namespace ShimmerConnect
             catch (MySqlException ex)
             {
                 Console.WriteLine("Error: {0}", ex.ToString());
+                if (conn != null)
+                {
+                    conn.Close();
+                }
 
             }
-            finally
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine("Error: {0}", ex.ToString());
+                if (conn != null)
+                {
+                    conn.Close();
+                }
+
+            }
+            /*finally
             {
                 if (conn != null)
                 {
                     conn.Close();
                 }
-            }
+            }*/
             return false;
 
             
@@ -3201,15 +3270,15 @@ namespace ShimmerConnect
         {
             
 
-            MySqlConnection conn = null;
+            //MySqlConnection conn = null;
 
             try
             {
                 //DateTime time = DateTime.Now;
                 string format = "yyyy-MM-dd hh:mm:ss";
                 string timeperiodformat = "tt";
-                conn = new MySqlConnection(cs);
-                conn.Open();
+                //conn = new MySqlConnection(cs);
+                //conn.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
@@ -3244,22 +3313,22 @@ namespace ShimmerConnect
             }
             finally
             {
-                if (conn != null)
+                /*if (conn != null)
                 {
                     conn.Close();
-                }
+                }*/
             }
         }
 
        public  String calcCurrentActivity() {
             
-            MySqlConnection conn = null;
-            MySqlDataReader rdr = null;
+            //MySqlConnection conn = null;
+            //MySqlDataReader rdr = null;
 
             try
             {
-                conn = new MySqlConnection(cs);
-                conn.Open();
+                //conn = new MySqlConnection(cs);
+                //conn.Open();
 
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
@@ -3273,6 +3342,7 @@ namespace ShimmerConnect
                 {
                     values[i] = rdr.GetDouble(0);
                     //Console.WriteLine(rdr.GetDouble(0));
+                    i++;
                 }
 
                 if (rdr != null)
@@ -3280,16 +3350,28 @@ namespace ShimmerConnect
                     rdr.Close();
                 }
 
+                //Console.WriteLine("last Value: " + values[0]);
+                //Console.WriteLine("penultimo Value: " + values[1]);
+
                 //calc Std Deviation
                 double stdDeviation = calcStandardDeviation(values);
-                Console.WriteLine("stddeviation: " + stdDeviation);
-                if (stdDeviation < 0.1)
+                //Console.WriteLine("stddeviation: " + stdDeviation);
+                /*if (stdDeviation < 0.1)
                     currentActivity = "inactive";
                 else
-                    currentActivity = "active";
+                    currentActivity = "active";*/
+                if (stdDeviation <= 0.1)
+                    currentActivity = "inactive";
+                else if (stdDeviation > 0.1 && stdDeviation <= 0.5)
+                    currentActivity = "low activity";
+                else if (stdDeviation > 0.5 && stdDeviation <= 1.0)
+                    currentActivity = "medium activity";
+                else if (stdDeviation > 1.0)
+                    currentActivity = "high activity";
+
                 //Show in screen
                 activityTextBox.Text = currentActivity;
-                Console.WriteLine(currentActivity);
+                //Console.WriteLine(currentActivity);
                
                 /*
                 //populate DB
@@ -3366,10 +3448,10 @@ namespace ShimmerConnect
                 {
                     rdr.Close();
                 }
-                if (conn != null)
+                /*if (conn != null)
                 {
                     conn.Close();
-                }
+                }*/
             }
             return currentActivity;
         }
@@ -3457,7 +3539,7 @@ namespace ShimmerConnect
         }
 
 
-
+        
 
     }
 
