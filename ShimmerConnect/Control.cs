@@ -50,20 +50,12 @@ namespace ShimmerConnect
     public partial class Control : Form
     {
         private static int numberOfDatabaseSaves = 0;
-        /*string cs = @"server=localhost;userid=lailson;
-            password=pass;database=pac";*/
-        string cs = @"server=us-cdbr-azure-west-a.cloudapp.net;userid=b682c0769dbd11;
-            password=696d3bff;database=as_2a1e9dcfd6f405c";
-        
-        //HEROKU INFO
-        //user 5aca4f53
-        //password bd6dafea529f47
-        //url
+        //counter is used to pause the sending of data to the database
+        private static int counter = 0;
 
-        //AZURE usar primeira linha
-        /*string cs = @"server=us-cdbr-azure-west-a.cloudapp.net;userid=b682c0769dbd11;
-            password=696d3bff;database=as_2a1e9dcfd6f405c";*/
-        //string cs = @"Database=as_2a1e9dcfd6f405c;Data Source=us-cdbr-azure-west-a.cloudapp.net;User Id=b682c0769dbd11;Password=696d3bff";
+        //cs contains the connection string to the database cloud server
+        string cs = @"server=us-cdbr-azure-central-a.cloudapp.net;userid=b125155e5e1df5; 
+            password=bba28a8d;database=PACMySQLDatabase";
         String userID = "";
         String patientID = "";
         private static String currentActivity = "inactive";
@@ -103,7 +95,7 @@ namespace ShimmerConnect
         private MainForm mainForm;
 
         Quaternion quat;
-        static int x=400;
+        static int x = 400;
         static int y;
         private Point[] textBoxLocation = new Point[] {
 #if _PLATFORM_LINUX
@@ -226,7 +218,7 @@ namespace ShimmerConnect
         private void FillSerialCmbBox()
         {
             cmbComPortSelect.Items.Clear();
-            
+
 #if _PLATFORM_LINUX
             cmbComPortSelect.Items.Add("/dev/rfcomm0");
 #endif
@@ -248,10 +240,10 @@ namespace ShimmerConnect
             FillSerialCmbBox();
         }
 
-        public Control(ShimmerProfile profile, List<GraphForm> channelPlot, bool saveToFile, StreamWriter csvFile, 
+        public Control(ShimmerProfile profile, List<GraphForm> channelPlot, bool saveToFile, StreamWriter csvFile,
             bool updateGraphs, ShowGraphsDelegate ShowGraphs, ChangeStatusLabelDelegate ChangeStatusLabel, MainForm mainForm)
             : this()
-        { 
+        {
             pProfile = profile;
             pChannelPlot = channelPlot;
             pSaveToFile = saveToFile;
@@ -262,16 +254,22 @@ namespace ShimmerConnect
             this.mainForm = mainForm;
         }
 
- 
+
         private void cmbComPortSelect_DropDown(object sender, EventArgs e)
         {
             FillSerialCmbBox();
         }
 
+        /*
+         * This method is called when the user clicks on the Connect Button. The application tries to 
+         * make a connection through the COM port specified in the GUI.
+         * 
+         */
+
         private void btnConnect_Click(object sender, EventArgs e)
         {
-            
-            if (cmbComPortSelect.Text != "")               
+
+            if (cmbComPortSelect.Text != "")
                 serialPort1.PortName = cmbComPortSelect.Text;
             try
             {
@@ -281,7 +279,6 @@ namespace ShimmerConnect
                 serialPort1.ReadTimeout = 500;
                 serialPort1.WriteTimeout = 500;
                 PChangeStatusLabel("Connected to " + serialPort1.PortName);
-                Console.WriteLine("test");
                 stopReading = false;
                 readThread = new Thread(new ThreadStart(ReadData));
                 readThread.Start();
@@ -300,9 +297,9 @@ namespace ShimmerConnect
                     pProfile.SetFirmwareVersion(0.1);
                     pProfile.SetFirmwareInternal(0);
                     pProfile.SetFirmVersionFullName("BoilerPlate 0.1.0");
-                    serialPort1.Write(new byte[1] { (byte)Shimmer2.PacketType.GET_FW_VERSION_COMMAND}, 0, 1);
+                    serialPort1.Write(new byte[1] { (byte)Shimmer2.PacketType.GET_FW_VERSION_COMMAND }, 0, 1);
                     System.Threading.Thread.Sleep(200);
-                    
+
                     serialPort1.Write(new byte[1] { (byte)Shimmer2.PacketType.GET_FW_VERSION_COMMAND }, 0, 1);
                     System.Threading.Thread.Sleep(200);
 
@@ -335,7 +332,7 @@ namespace ShimmerConnect
 
                     this.mainForm.enableConfigFormMenu(true);
                     this.mainForm.setShimmerVersion(pProfile.GetShimmerVersion()); // this is to configure the graphs
-                    
+
                 }
                 if (pSaveToFile)
                 {
@@ -356,24 +353,6 @@ namespace ShimmerConnect
                 btnStart.Enabled = true;
                 btnStop.Enabled = true;
                 cmbComPortSelect.Enabled = false;
-
-                /*
-                //teste doido
-                try
-                {
-                    conn = new MySqlConnection(cs);
-                    conn.Open();
-                }
-                catch (MySqlException ex)
-                {
-                    Console.WriteLine("Error: {0}", ex.ToString());
-                }
-
-                //populate the database
-                populateDatabase();*/
-
-
-
             }
             catch
             {
@@ -381,7 +360,7 @@ namespace ShimmerConnect
                 PChangeStatusLabel("Cannot connect to specified serial port!");
                 MessageBox.Show("Cannot open " + serialPort1.PortName, Shimmer.ApplicationName,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }            
+            }
         }
 
         private void btnDisconnect_Click(object sender, EventArgs e)
@@ -406,15 +385,15 @@ namespace ShimmerConnect
             btnConnect.Enabled = true;
             cmbComPortSelect.Enabled = true;
             if (conn != null)
-                {
-                    conn.Close();
-                }
-            
+            {
+                conn.Close();
+            }
+
         }
 
         private void RemoveChannelTextBoxes()
         {
-            while (channelTextBox.Count !=0)
+            while (channelTextBox.Count != 0)
             {
                 this.Controls.Remove(channelTextBox[0]);
                 channelTextBox.RemoveAt(0);
@@ -430,35 +409,37 @@ namespace ShimmerConnect
         }
 
 
-
+        /*
+         * This method is called when the user click on the start button.
+         * If the app is correctly connected to the shimmer sensor, this button becomes available.
+         * 
+         * 
+         */
 
         private void btnStart_Click(object sender, EventArgs e)
         {
+            //Checks if all the GUI textboxes are not empty
             if (!patientFirstNameTextbox.Text.Equals("") || !patientLastNameTextbox.Text.Equals("") ||
                 !userFirstNameTextbox.Text.Equals("") || !userLastNameTextbox.Text.Equals("") ||
                 !userTypeTextbox.Text.Equals("") || !deviceLocationTextbox.Text.Equals(""))
             {
-
                 if (serialPort1.IsOpen)
                 {
                     if (pProfile.GetIsFilled())
                     {
+                        //2.0 change. The backend doesn't perform the activity recognition calculation anymore
+                        //activityTextBox.Text = currentActivity;
+                        try
+                        {
+                            conn = new MySqlConnection(cs);
+                            conn.Open();
+                        }
+                        catch (MySqlException ex)
+                        {
+                            Console.WriteLine("Error: {0}", ex.ToString());
+                        }
 
-                        activityTextBox.Text = currentActivity;
-            
-            
-
-            try
-            {
-                conn = new MySqlConnection(cs);
-                conn.Open();
-            }
-            catch (MySqlException ex)
-            {
-                Console.WriteLine("Error: {0}", ex.ToString());
-            }
-        
-                        //populate the database
+                        //populate the database with the information provided from the GUI
                         populateDatabase();
 
 
@@ -468,10 +449,8 @@ namespace ShimmerConnect
                         }
                         else
                         {
-
                             serialPort1.Write(new byte[1] { (byte)Shimmer2.PacketType.GET_BLINK_LED }, 0, 1);
                             System.Threading.Thread.Sleep(500);
-
                         }
                         ShowChannelTextBoxes();
                         setOriMatrix = new double[,] { { 1, 0, 0 }, { 0, -1, 0 }, { 0, 0, -1 } };
@@ -498,12 +477,9 @@ namespace ShimmerConnect
                         {
                             pProfile.SetVReg(true);
                         }
-
                     }
-
                     else
                     {
-                        Console.WriteLine("teste");
                         MessageBox.Show("Failed to read configuration information from shimmer. Please ensure correct shimmer is connected", Shimmer.ApplicationName,
                             MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
@@ -512,7 +488,9 @@ namespace ShimmerConnect
                     MessageBox.Show("No serial port is open", Shimmer.ApplicationName,
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else {
+            else
+            {
+                //User didn't fill all the textboxes in the GUI
                 MessageBox.Show("Please make sure you fill all the information required in the form.", Shimmer.ApplicationName,
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -531,7 +509,7 @@ namespace ShimmerConnect
                 {
                     serialPort1.ReadByte();
                 }
-                
+
             }
             else
                 MessageBox.Show("No serial port is open", Shimmer.ApplicationName,
@@ -564,7 +542,7 @@ namespace ShimmerConnect
                                     {
                                         SetTextChannels(packet);
                                     }
-                                 
+
                                 }
                                 else
                                 {
@@ -580,15 +558,7 @@ namespace ShimmerConnect
                                         buffer.Add((byte)serialPort1.ReadByte());
                                     }
                                     ShimmerDataPacket packet = new ShimmerDataPacket(buffer, pProfile.GetNumAdcChannels(), pProfile.GetNum1ByteDigiChannels(), pProfile.GetNum2ByteDigiChannels(), pProfile.GetShimmerVersion(), pProfile.GetNumChannels(), pProfile);
-                                    
-                                    //teste2
-                                   // Console.WriteLine("pacote2: " + packet);
-                                    /*for (int k = 0; k < pProfile.GetNumChannels(); k++)
-                                    {
-                                        Console.WriteLine(Shimmer3.ChannelProperties[pProfile.GetChannel(k)]);
-                                        
-                                    }*/
-
+                                                       
                                     if (packet.GetIsFilled() && (pProfile.GetNumChannels() > 0))
                                     {
                                         SetTextChannels(packet);
@@ -615,7 +585,6 @@ namespace ShimmerConnect
 
                                 if (sensorsChangePending)
                                 {
-                                    
                                     if (pSaveToFile)
                                     {
                                         if (pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER2R || pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER2)
@@ -630,9 +599,9 @@ namespace ShimmerConnect
                                 }
                                 else
                                 {
-                                   
+
                                 }
-                                
+
                                 sensorsChangePending = false;
                             }
                             else if (pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3)
@@ -648,13 +617,9 @@ namespace ShimmerConnect
                                     buffer.Add((byte)serialPort1.ReadByte());
                                 }
                                 pProfile.fillProfileShimmer3(buffer);
-                                
+
                                 if (sensorsChangePending)
                                 {
-
-
-
-                                   
                                     if (pSaveToFile)
                                     {
                                         if (pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER2R || pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER2)
@@ -669,7 +634,7 @@ namespace ShimmerConnect
                                 }
                                 else
                                 {
-                                   
+
                                 }
 
                                 sensorsChangePending = false;
@@ -685,7 +650,9 @@ namespace ShimmerConnect
                                 value += (((int)serialPort1.ReadByte() << 8) & 0xFF00);
                                 pProfile.SetAdcSamplingRate(value);
 
-                            } else {
+                            }
+                            else
+                            {
                                 pProfile.SetAdcSamplingRate(serialPort1.ReadByte());
                             }
                             break;
@@ -711,10 +678,10 @@ namespace ShimmerConnect
                                 }
                                 else
                                 {
-                                 //   pProfile.UpdateChannelsFromSensorsShimmer3();
+                                    //   pProfile.UpdateChannelsFromSensorsShimmer3();
                                 }
-                               
-                               // sensorsChangePending = false;
+
+                                // sensorsChangePending = false;
                             }
                             break;
                         case (byte)Shimmer2.PacketType.AccelCalibrationResponse:
@@ -722,8 +689,8 @@ namespace ShimmerConnect
                             bufferbyte = new byte[21];
                             for (int p = 0; p < 21; p++)
                             {
-                               bufferbyte[p]=(byte)serialPort1.ReadByte();
-                                
+                                bufferbyte[p] = (byte)serialPort1.ReadByte();
+
                             }
                             retrievecalibrationparametersfrompacket(bufferbyte, (byte)Shimmer2.PacketType.AccelCalibrationResponse);
                             break;
@@ -752,8 +719,8 @@ namespace ShimmerConnect
                             bufferbyte = new byte[21];
                             for (int p = 0; p < 21; p++)
                             {
-                               bufferbyte[p]=(byte)serialPort1.ReadByte();
-                                
+                                bufferbyte[p] = (byte)serialPort1.ReadByte();
+
                             }
                             retrievecalibrationparametersfrompacket(bufferbyte, (byte)Shimmer2.PacketType.AccelCalibrationResponse);
 
@@ -823,9 +790,9 @@ namespace ShimmerConnect
                             bufferbyte = new byte[22];
                             for (int p = 0; p < 22; p++)
                             {
-                               bufferbyte[p]=(byte)serialPort1.ReadByte();
-                               
-	                            
+                                bufferbyte[p] = (byte)serialPort1.ReadByte();
+
+
                             }
                             pProfile.AC1 = calculatetwoscomplement((int)((int)(bufferbyte[1] & 0xFF) + ((int)(bufferbyte[0] & 0xFF) << 8)), 16);
                             pProfile.AC2 = calculatetwoscomplement((int)((int)(bufferbyte[3] & 0xFF) + ((int)(bufferbyte[2] & 0xFF) << 8)), 16);
@@ -888,14 +855,14 @@ namespace ShimmerConnect
                 {
                     // do nothing
                     // gets here if serial port is forcibly closed
-                   // MessageBox.Show("Error2", Shimmer.ApplicationName,
-                  //MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // MessageBox.Show("Error2", Shimmer.ApplicationName,
+                    //MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 catch (System.IO.IOException)
                 {
                     // do nothing
                     //MessageBox.Show("Error3", Shimmer.ApplicationName,
-                  //MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    //MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 /*
                 catch
@@ -906,13 +873,9 @@ namespace ShimmerConnect
             }
             // only stop reading when disconnecting, so disconnect serial port here too
             serialPort1.Close();
-            
-        }
 
-        String lowNoiseAccXRaw = "";
-        String lowNoiseAccYRaw = "";
-        String lowNoiseAccZRaw = "";
-        int j = 0;
+        }
+                
 
         // This method demonstrates a pattern for making thread-safe
         // calls on a Windows Forms control. 
@@ -927,7 +890,6 @@ namespace ShimmerConnect
         // For full details see: http://msdn.microsoft.com/en-us/library/ms171728%28VS.80%29.aspx
         private void SetTextChannels(ShimmerDataPacket packet)
         {
-            
             try
             {
                 if (this.channelTextBox[0].InvokeRequired) // all will be in the same thread
@@ -949,29 +911,26 @@ namespace ShimmerConnect
                     {
                         pCsvFile.Write(packet.GetTimeStamp().ToString());
                     }
-                    
-
-
 
                     for (int i = 0; i < packet.GetNumChannels(); i++)
-                    { 
+                    {
                         //check the battery if it has been enabled
                         if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.AnExA7) && pProfile.GetPMux())
+                        {
+                            double battery = (calibrateU12AdcValue(packet.GetChannel(i), 0, 3, 1) * 2);
+                            if ((calibrateU12AdcValue(packet.GetChannel(i), 0, 3, 1) * 2) < 3400)
                             {
-                                double battery = (calibrateU12AdcValue(packet.GetChannel(i), 0, 3, 1) * 2);
-                                if ((calibrateU12AdcValue(packet.GetChannel(i), 0, 3, 1) * 2) < 3400)
+                                //System.Threading.Thread.Sleep(500);
+                                if (pProfile.CurrentLEDStatus == 0)
                                 {
-                                    //System.Threading.Thread.Sleep(500);
-                                    if (pProfile.CurrentLEDStatus == 0)
+                                    if (serialPort1.IsOpen)
                                     {
-                                        if (serialPort1.IsOpen)
-                                        {
-                                            serialPort1.Write(new byte[2] { (byte)Shimmer2.PacketType.SET_BLINK_LED, (byte)1 }, 0, 2);
-                                            pProfile.CurrentLEDStatus = 1;
-                                        }
+                                        serialPort1.Write(new byte[2] { (byte)Shimmer2.PacketType.SET_BLINK_LED, (byte)1 }, 0, 2);
+                                        pProfile.CurrentLEDStatus = 1;
                                     }
                                 }
                             }
+                        }
 
 
                         if (pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.XMag ||
@@ -989,9 +948,7 @@ namespace ShimmerConnect
                             //this.extraInfoTextBox.Text = MagHeading((Int16)packet.GetChannel(i),(Int16)packet.GetChannel(i + 1),(Int16)packet.GetChannel(i + 2)).ToString();
                         }
 
-                        
-                        
-                        if (pUpdateGraphs) 
+                        if (pUpdateGraphs)
                         {
                             int enabledSensors = pProfile.GetSensors();
                             //if (((byte)enabledSensors[0] & (byte)Shimmer2.Sensor0Bitmap.SensorAccel) > 0 && ((byte)enabledSensors[0] & (byte)Shimmer2.Sensor0Bitmap.SensorGyro) > 0 && ((byte)enabledSensors[0] & (byte)Shimmer2.Sensor0Bitmap.SensorMag) > 0)
@@ -1000,16 +957,16 @@ namespace ShimmerConnect
 
                                 //run through and get all the data required for orientation calculation
 
-                                if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.XAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.XLNAccel && (pProfile.GetSensors() & (int)Shimmer3.SensorBitmap.SensorDAccel) == 0)) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.XLNAccel && pProfile.GetAccelRange() ==0)))
+                                if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.XAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.XLNAccel && (pProfile.GetSensors() & (int)Shimmer3.SensorBitmap.SensorDAccel) == 0)) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.XLNAccel && pProfile.GetAccelRange() == 0)))
                                 {
                                     dataAccel[0] = (double)packet.GetChannel(i);
-                                  
+
                                 }
                                 else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.YAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.YLNAccel && (pProfile.GetSensors() & (int)Shimmer3.SensorBitmap.SensorDAccel) == 0)) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.YLNAccel && pProfile.GetAccelRange() == 0)))
                                 {
 
                                     dataAccel[1] = (double)packet.GetChannel(i);
-                                  
+
                                 }
                                 else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.ZAccel && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.ZLNAccel && (pProfile.GetSensors() & (int)Shimmer3.SensorBitmap.SensorDAccel) == 0)) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.ZLNAccel && pProfile.GetAccelRange() == 0)))
                                 {
@@ -1043,7 +1000,7 @@ namespace ShimmerConnect
                                 else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.ZGyro && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || (pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.ZGyro && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
                                 {
                                     dataGyroRaw[2] = (double)packet.GetChannel(i);
-                                  
+
                                 }
                                 else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.XMag && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || (pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.XMag && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
                                 {
@@ -1052,13 +1009,13 @@ namespace ShimmerConnect
                                 else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.YMag && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || (pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.YMag && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
                                 {
                                     dataMagRaw[1] = (double)packet.GetChannel(i);
-                                    
+
                                 }
                                 else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.ZMag && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || (pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.ZMag && pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3))
                                 {
                                     dataMagRaw[2] = (double)packet.GetChannel(i);
-                                    
-                                    
+
+
                                 }
 
                                 if (i == packet.GetNumChannels() - 1) // if it is the last sensor channel calculate orientation
@@ -1115,9 +1072,6 @@ namespace ShimmerConnect
 
                                         }
                                     }
-
-
-
 
                                     dataMagCal = calibrateInertialSensorData(dataMagRaw, pProfile.AlignmentMatrixMag, pProfile.SensitivityMatrixMag, pProfile.OffsetVectorMag);
                                     quat = mOrientation.update(dataAccel[0], dataAccel[1], dataAccel[2], dataGyroRaw[0] * Math.PI / 180, dataGyroRaw[1] * Math.PI / 180, dataGyroRaw[2] * Math.PI / 180, dataMagCal[0], dataMagCal[1], dataMagCal[2]);
@@ -1225,13 +1179,14 @@ namespace ShimmerConnect
                                     pChannelPlot[i].psQueue.Enqueue(new Point(0, packet.GetChannel(i)));
                                 }
                             }
-                                pChannelPlot[i].Invalidate();
+                            pChannelPlot[i].Invalidate();
                         }
 
                         if (pSaveToFile)
                         {
                             pCsvFile.Write(delimiter + packet.GetChannel(i).ToString());
                         }
+
                         //Save RAW data into database
                         //String sensorName = Shimmer3.ChannelProperties[pProfile.GetChannel(i)];
 
@@ -1264,14 +1219,14 @@ namespace ShimmerConnect
 
                         }*/
 
-                   
+
                     }
                     //WRITE CAL DATA
                     if (pSaveToFile)
                     {
                         pCsvFile.Write(delimiter + calibrateTimeStamp(packet.GetTimeStamp()).ToString());
                     }
-               
+
 
                     for (int i = 0; i < packet.GetNumChannels(); i++)
                     {
@@ -1435,7 +1390,7 @@ namespace ShimmerConnect
                                         p2 = -0.3193;
                                     }
                                 }
-                                pCsvFile.Write(delimiter + calibrateGsrData(datatemp[0],p1,p2).ToString());
+                                pCsvFile.Write(delimiter + calibrateGsrData(datatemp[0], p1, p2).ToString());
                             }
 
                             else if (pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.StrainHigh && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3)
@@ -1449,7 +1404,7 @@ namespace ShimmerConnect
                             else if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.AnExA7) && pProfile.GetPMux() && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3)
                             {
                                 pCsvFile.Write(delimiter + (calibrateU12AdcValue(packet.GetChannel(i), 0, 3, 1) * 2).ToString());
-                                
+
                             }
                             else if (((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.AnExA0) && pProfile.GetPMux() && pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3) || ((pProfile.GetChannel(i) == (int)Shimmer3.ChannelContents.VBatt) && (pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3)))
                             {
@@ -1521,37 +1476,36 @@ namespace ShimmerConnect
                             datatemp[2] = (double)packet.GetChannel(i);
                             datatemp = calibrateInertialSensorData(datatemp, pProfile.AlignmentMatrixAccel, pProfile.SensitivityMatrixAccel, pProfile.OffsetVectorAccel);
 
-
+                            //Start calculation for saving CAL Accelerometer data into the database
                             String lowNoiseAccXCAL = datatemp[0].ToString();
                             String lowNoiseAccYCAL = datatemp[1].ToString();
                             String lowNoiseAccZCAL = datatemp[2].ToString();
-                            
-                                //if (verifiyTimeStamp())
-                                //{
-                            //Console.WriteLine("pj: " + j);
-                            if (j % 50 != 0)
+                                                        
+                            //We can't save the data to the database at every time, so we need a pause of 1 second.
+                            //To get this pause, a workaround is to use this counter variable to stay in the loop until counter becomes
+                            //divisible by 50. After some trial and error, I figured it out that this gives exact 1 second between each 
+                            //save.
+                            if (counter % 50 != 0)
                             {
-                                j++;
+                                counter++;
                                 continue;
                             }
                             else
                             {
-                                //Console.WriteLine("j: " + j);
-                                j++;
+                                //After 1 second, we need to save the data from the CAL accx, accy, accz to the activitydataset table
+                                counter++;
                                 currentDateTime = DateTime.Now;
                                 currentDateTime = currentDateTime.Date.AddHours(currentDateTime.Hour).AddMinutes(currentDateTime.Minute).AddSeconds(currentDateTime.Second).AddMilliseconds(0);
-         
+
                                 saveCALSensorDataIntoDatabase(lowNoiseAccXCAL, lowNoiseAccYCAL, lowNoiseAccZCAL);
-                                //Console.WriteLine("Database writing: " + numberOfDatabaseSaves);
-                                if (numberOfDatabaseSaves % 2 == 0)
+                                //2.0 change. Current activity isn't calculated in the back end anymore.
+                                /*if (numberOfDatabaseSaves % 2 == 0)
                                 {
                                     String currentActivity = calcCurrentActivity();
-                                    //Console.WriteLine("CURRENT ACTIVITY: " + currentActivity);
-                                }
-                                //}
+                                }*/
                             }
-                            
-                        }                                        
+
+                        }
                     } //end for 
                     if (pSaveToFile)
                     {
@@ -1563,11 +1517,7 @@ namespace ShimmerConnect
                             pCsvFile.Write(delimiter + quat.q4);
                         }
 
-                        pCsvFile.Write("\n");
-                        
-
-
-
+                        pCsvFile.Write("\n");                        
                     }
                 }
             }
@@ -1580,7 +1530,7 @@ namespace ShimmerConnect
             }
         }
 
-        
+
 
         protected double calibrateU12AdcValue(double uncalibratedData, double offset, double vRefP, double gain)
         {
@@ -1633,98 +1583,105 @@ namespace ShimmerConnect
             return caldata;
         }
 
-        protected double[] calibrateInertialSensorData(double[] data, double[,] AM, double[,] SM, double[,] OV) {
-		/*  Based on the theory outlined by Ferraris F, Grimaldi U, and Parvis M.  
-           in "Procedure for effortless in-field calibration of three-axis rate gyros and accelerometers" Sens. Mater. 1995; 7: 311-30.            
-           C = [R^(-1)] .[K^(-1)] .([U]-[B])
-			where.....
-			[C] -> [3 x n] Calibrated Data Matrix 
-			[U] -> [3 x n] Uncalibrated Data Matrix
-			[B] ->  [3 x n] Replicated Sensor Offset Vector Matrix 
-			[R^(-1)] -> [3 x 3] Inverse Alignment Matrix
-			[K^(-1)] -> [3 x 3] Inverse Sensitivity Matrix
-			n = Number of Samples
-			*/
+        protected double[] calibrateInertialSensorData(double[] data, double[,] AM, double[,] SM, double[,] OV)
+        {
+            /*  Based on the theory outlined by Ferraris F, Grimaldi U, and Parvis M.  
+               in "Procedure for effortless in-field calibration of three-axis rate gyros and accelerometers" Sens. Mater. 1995; 7: 311-30.            
+               C = [R^(-1)] .[K^(-1)] .([U]-[B])
+                where.....
+                [C] -> [3 x n] Calibrated Data Matrix 
+                [U] -> [3 x n] Uncalibrated Data Matrix
+                [B] ->  [3 x n] Replicated Sensor Offset Vector Matrix 
+                [R^(-1)] -> [3 x 3] Inverse Alignment Matrix
+                [K^(-1)] -> [3 x 3] Inverse Sensitivity Matrix
+                n = Number of Samples
+                */
             double[] tempdata = data;
-            double [,] data2d=new double [3,1];
-            data2d[0,0]=data[0];
-            data2d[1,0]=data[1];
-            data2d[2,0]=data[2];
+            double[,] data2d = new double[3, 1];
+            data2d[0, 0] = data[0];
+            data2d[1, 0] = data[1];
+            data2d[2, 0] = data[2];
             data2d = matrixmultiplication(matrixmultiplication(matrixinverse3x3(AM), matrixinverse3x3(SM)), matrixminus(data2d, OV));
-            tempdata[0]=data2d[0,0];
-            tempdata[1]=data2d[1,0];
-            tempdata[2]=data2d[2,0];
+            tempdata[0] = data2d[0, 0];
+            tempdata[1] = data2d[1, 0];
+            tempdata[2] = data2d[2, 0];
             return tempdata;
-	    }
+        }
 
 
-        private double[,] matrixinverse3x3(double[,] data) {
-	    double a,b,c,d,e,f,g,h,i;
-	    a=data[0,0];
-	    b=data[0,1];
-	    c=data[0,2];
-	    d=data[1,0];
-	    e=data[1,1];
-	    f=data[1,2];
-	    g=data[2,0];
-	    h=data[2,1];
-	    i=data[2,2];
-	    //
-	    double deter=a*e*i+b*f*g+c*d*h-c*e*g-b*d*i-a*f*h;
-	    double[,] answer=new double[3,3];
-	    answer[0,0]=(1/deter)*(e*i-f*h);
-	    
-	    answer[0,1]=(1/deter)*(c*h-b*i);
-	    answer[0,2]=(1/deter)*(b*f-c*e);
-	    answer[1,0]=(1/deter)*(f*g-d*i);
-	    answer[1,1]=(1/deter)*(a*i-c*g);
-	    answer[1,2]=(1/deter)*(c*d-a*f);
-	    answer[2,0]=(1/deter)*(d*h-e*g);
-	    answer[2,1]=(1/deter)*(g*b-a*h);
-	    answer[2,2]=(1/deter)*(a*e-b*d);
-	    return answer;
-	    }
+        private double[,] matrixinverse3x3(double[,] data)
+        {
+            double a, b, c, d, e, f, g, h, i;
+            a = data[0, 0];
+            b = data[0, 1];
+            c = data[0, 2];
+            d = data[1, 0];
+            e = data[1, 1];
+            f = data[1, 2];
+            g = data[2, 0];
+            h = data[2, 1];
+            i = data[2, 2];
+            //
+            double deter = a * e * i + b * f * g + c * d * h - c * e * g - b * d * i - a * f * h;
+            double[,] answer = new double[3, 3];
+            answer[0, 0] = (1 / deter) * (e * i - f * h);
 
-        private double[,] matrixminus(double[,] a, double[,] b) {
-		          
+            answer[0, 1] = (1 / deter) * (c * h - b * i);
+            answer[0, 2] = (1 / deter) * (b * f - c * e);
+            answer[1, 0] = (1 / deter) * (f * g - d * i);
+            answer[1, 1] = (1 / deter) * (a * i - c * g);
+            answer[1, 2] = (1 / deter) * (c * d - a * f);
+            answer[2, 0] = (1 / deter) * (d * h - e * g);
+            answer[2, 1] = (1 / deter) * (g * b - a * h);
+            answer[2, 2] = (1 / deter) * (a * e - b * d);
+            return answer;
+        }
+
+        private double[,] matrixminus(double[,] a, double[,] b)
+        {
+
             int aRows = a.GetLength(0),
             aColumns = a.GetLength(1),
             bRows = b.GetLength(0),
             bColumns = b.GetLength(1);
-            double[,] resultant = new double[aRows,bColumns];
-	    	for(int i = 0; i < aRows; i++) { // aRow
-		        for(int k = 0; k < aColumns; k++) { // aColumn
-		        	resultant[i,k]=a[i,k]-b[i,k];
-		        }
-		    }
-		    return resultant;
-	    }
+            double[,] resultant = new double[aRows, bColumns];
+            for (int i = 0; i < aRows; i++)
+            { // aRow
+                for (int k = 0; k < aColumns; k++)
+                { // aColumn
+                    resultant[i, k] = a[i, k] - b[i, k];
+                }
+            }
+            return resultant;
+        }
 
-        private double[,] matrixmultiplication(double[,] a, double[,] b) {
-   		  
-          int aRows = a.GetLength(0),
-              aColumns = a.GetLength(1),
-               bRows = b.GetLength(0),
-               bColumns = b.GetLength(1);
-          double[,] resultant = new double[aRows,bColumns];
+        private double[,] matrixmultiplication(double[,] a, double[,] b)
+        {
 
-          for (int i = 0; i < aRows; i++)
-          { // aRow
-              for (int j = 0; j < bColumns; j++)
-              { // bColumn
-                  for (int k = 0; k < aColumns; k++) { // aColumn
-   		        resultant[i,j] += a[i,k] * b[k,j];
-   		      }
-   		    }
-   		  }
-   		 
-   		  return resultant;
-    }
+            int aRows = a.GetLength(0),
+                aColumns = a.GetLength(1),
+                 bRows = b.GetLength(0),
+                 bColumns = b.GetLength(1);
+            double[,] resultant = new double[aRows, bColumns];
+
+            for (int i = 0; i < aRows; i++)
+            { // aRow
+                for (int j = 0; j < bColumns; j++)
+                { // bColumn
+                    for (int k = 0; k < aColumns; k++)
+                    { // aColumn
+                        resultant[i, j] += a[i, k] * b[k, j];
+                    }
+                }
+            }
+
+            return resultant;
+        }
 
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if(serialPort1.IsOpen)
+            if (serialPort1.IsOpen)
                 serialPort1.Close();
             if (readThread != null)
                 readThread.Abort();
@@ -1744,7 +1701,7 @@ namespace ShimmerConnect
                 }
                 if (pProfile.changeInternalExpPower)
                 {
-                    if (pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3 && pProfile.GetFirmwareVersion()>0.1)
+                    if (pProfile.GetShimmerVersion() == (int)Shimmer.ShimmerVersion.SHIMMER3 && pProfile.GetFirmwareVersion() > 0.1)
                     {
                         if (wait)
                             System.Threading.Thread.Sleep(500);
@@ -1760,7 +1717,7 @@ namespace ShimmerConnect
                     {
                         if (wait)
                             System.Threading.Thread.Sleep(500);
-                        serialPort1.Write(new byte[2] { (byte)Shimmer3.PacketType.SET_BMP180_PRES_RESOLUTION_COMMAND, (byte)pProfile.GetPresRes()}, 0, 2);
+                        serialPort1.Write(new byte[2] { (byte)Shimmer3.PacketType.SET_BMP180_PRES_RESOLUTION_COMMAND, (byte)pProfile.GetPresRes() }, 0, 2);
 
                         pProfile.changePresRes = false;
                         wait = true;
@@ -1776,13 +1733,13 @@ namespace ShimmerConnect
                     }
                     else
                     {
-                        byte firstbyte = (byte)( pProfile.GetAdcSamplingRate() & 0xff);
+                        byte firstbyte = (byte)(pProfile.GetAdcSamplingRate() & 0xff);
                         byte secondbyte = (byte)(pProfile.GetAdcSamplingRate() >> 8 & 0xff);
                         serialPort1.Write(new byte[3] { (byte)Shimmer2.PacketType.SET_SAMPLING_RATE_COMMAND, 
                         firstbyte,secondbyte }, 0, 3);
                     }
                     wait = true;
-                    
+
                     if (wait)
                     {
                         System.Threading.Thread.Sleep(500);
@@ -1792,7 +1749,7 @@ namespace ShimmerConnect
                         double samplingRate = (double)1024 / (double)pProfile.GetAdcSamplingRate();
                         if (!pProfile.enableLowPowerMag)
                         {
-                            
+
                             if (samplingRate <= 1)
                             {
                                 serialPort1.Write(new byte[2] { (byte)Shimmer2.PacketType.SET_MAG_SAMPLING_RATE_COMMAND, (byte)1 }, 0, 2);
@@ -1868,7 +1825,7 @@ namespace ShimmerConnect
                     }
                     if ((pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3))
                     {
-                        
+
                     }
                     else
                     {
@@ -1878,7 +1835,7 @@ namespace ShimmerConnect
                             if (samplingRate <= 1)
                             {
                                 serialPort1.Write(new byte[2] { (byte)Shimmer3.PacketType.SET_ACCEL_SAMPLING_RATE_COMMAND, (byte)1 }, 0, 2);
-                            } 
+                            }
                             else if (samplingRate <= 10)
                             {
                                 serialPort1.Write(new byte[2] { (byte)Shimmer3.PacketType.SET_ACCEL_SAMPLING_RATE_COMMAND, (byte)2 }, 0, 2);
@@ -1967,8 +1924,8 @@ namespace ShimmerConnect
                     wait = true;
                 }
 
-                
-                if (pProfile.change5Vreg &&  (pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3))
+
+                if (pProfile.change5Vreg && (pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3))
                 {
                     if (wait)
                         System.Threading.Thread.Sleep(500);
@@ -1991,7 +1948,7 @@ namespace ShimmerConnect
                 {
                     if (wait)
                         System.Threading.Thread.Sleep(500);
-                    serialPort1.Write(new byte[2] { (byte)Shimmer2.PacketType.SET_ACCEL_RANGE_COMMAND, (byte)pProfile.GetAccelRange()}, 0, 2);
+                    serialPort1.Write(new byte[2] { (byte)Shimmer2.PacketType.SET_ACCEL_RANGE_COMMAND, (byte)pProfile.GetAccelRange() }, 0, 2);
 
                     pProfile.changeAccelSens = false;
                     wait = true;
@@ -2084,11 +2041,9 @@ namespace ShimmerConnect
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        //ajeitar essa porra aqui
-
         public void ShowChannelTextBoxes()
         {
-            if(this.btnConnect.InvokeRequired)  // will be in the same thread as the controls to be added
+            if (this.btnConnect.InvokeRequired)  // will be in the same thread as the controls to be added
             {
                 ShowChannelTextBoxesCallback d = new ShowChannelTextBoxesCallback(ShowChannelTextBoxes);
                 this.Invoke(d);
@@ -2112,7 +2067,7 @@ namespace ShimmerConnect
                     extraGraphs = 4;
                 }
 
-                for (int i = 0; i < pProfile.GetNumChannels()+extraGraphs; i++)
+                for (int i = 0; i < pProfile.GetNumChannels() + extraGraphs; i++)
                 {
                     if (i == channelTextBox.Count)
                     {
@@ -2133,7 +2088,7 @@ namespace ShimmerConnect
                         channelLabel[i].Location = labelLocation[i];
                         this.Controls.Add(channelLabel[i]);
                     }
-                    
+
                     if (pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3)
                     {
                         if (i < pProfile.GetNumChannels())
@@ -2149,7 +2104,7 @@ namespace ShimmerConnect
                         {
                             channelLabel[i].Text = "VSenseBatt";
                         }
-                        
+
                     }
                     else
                     {
@@ -2187,7 +2142,7 @@ namespace ShimmerConnect
                     {
                         channelLabel[i].Text = "Quartenion 4";
                     }
-                    
+
                 }
                 if (pProfile.showMagHeading || pProfile.showGsrResistance)
                 {
@@ -2226,7 +2181,7 @@ namespace ShimmerConnect
         {
             pCsvFile = csvFile;
             SaveToFile(saveToFile);
-            
+
         }
 
         public void SaveToFile(bool saveToFile)
@@ -2241,21 +2196,21 @@ namespace ShimmerConnect
                 {
                     WriteHeaderToFileShimmer3();
                 }
-                
+
         }
 
         public void WriteHeaderToFileShimmer2()
         {
-            
+
             //Insert object name
             delimiter = pProfile.GetLoggingDelimiter();
             pCsvFile.Write("Shimmer 1");
             for (int i = 0; i < pProfile.GetNumChannels(); i++)
             {
-                    pCsvFile.Write(delimiter + "Shimmer 1");
+                pCsvFile.Write(delimiter + "Shimmer 1");
 
             }
-            pCsvFile.Write(delimiter+"Shimmer 1");
+            pCsvFile.Write(delimiter + "Shimmer 1");
             for (int i = 0; i < pProfile.GetNumChannels(); i++)
             {
                 pCsvFile.Write(delimiter + "Shimmer 1");
@@ -2302,7 +2257,7 @@ namespace ShimmerConnect
             }
 
             //Insert property name for CAL format
-            pCsvFile.Write(delimiter+"Timestamp");
+            pCsvFile.Write(delimiter + "Timestamp");
             for (int i = 0; i < pProfile.GetNumChannels(); i++)
             {
                 if ((pProfile.GetChannel(i) == (int)Shimmer2.ChannelContents.AnExA0) && pProfile.GetPMux())
@@ -2336,8 +2291,8 @@ namespace ShimmerConnect
                 pCsvFile.Write(delimiter + "RAW");
 
             }
-            
-            pCsvFile.Write(delimiter+"CAL");
+
+            pCsvFile.Write(delimiter + "CAL");
             for (int i = 0; i < pProfile.GetNumChannels(); i++)
             {
                 pCsvFile.Write(delimiter + "CAL");
@@ -2397,16 +2352,16 @@ namespace ShimmerConnect
             if (pProfile.enable3DOrientation == true)
             {
                 pCsvFile.Write(delimiter + "No unit");
-                pCsvFile.Write(delimiter + "No unit"); 
-                pCsvFile.Write(delimiter + "No unit"); 
+                pCsvFile.Write(delimiter + "No unit");
+                pCsvFile.Write(delimiter + "No unit");
                 pCsvFile.Write(delimiter + "No unit");
             }
 
 
             pCsvFile.Write("\n");
 
-           
-            
+
+
         }
 
 
@@ -2446,14 +2401,14 @@ namespace ShimmerConnect
             pCsvFile.Write("Timestamp");
             for (int i = 0; i < pProfile.GetNumChannels(); i++)
             {
-                  pCsvFile.Write(delimiter + Shimmer3.ChannelProperties[pProfile.GetChannel(i)]);
+                pCsvFile.Write(delimiter + Shimmer3.ChannelProperties[pProfile.GetChannel(i)]);
             }
 
             //Insert property name for CAL format
             pCsvFile.Write(delimiter + "Timestamp");
             for (int i = 0; i < pProfile.GetNumChannels(); i++)
             {
-                  pCsvFile.Write(delimiter + Shimmer3.ChannelProperties[pProfile.GetChannel(i)]);
+                pCsvFile.Write(delimiter + Shimmer3.ChannelProperties[pProfile.GetChannel(i)]);
             }
             //If 3d orientation enabled insert extra headers here
             if (pProfile.enable3DOrientation == true)
@@ -2542,11 +2497,7 @@ namespace ShimmerConnect
 
         }
 
-
-
-
-
-
+                                
         public void UpdateGraphs(bool val)
         {
             pUpdateGraphs = val;
@@ -2585,30 +2536,30 @@ namespace ShimmerConnect
                 case (int)Shimmer2.GsrRange.HW_RES_40K:
                     resistance = (int)(
                         ((0.0000000065995) * Math.Pow(gsrAdcVal, 4)) +
-                        ((-0.000068950)    * Math.Pow(gsrAdcVal, 3)) +
-                        ((0.2699)          * Math.Pow(gsrAdcVal, 2)) +
-                        ((-476.9835)       * Math.Pow(gsrAdcVal, 1)) + 340351.3341);
+                        ((-0.000068950) * Math.Pow(gsrAdcVal, 3)) +
+                        ((0.2699) * Math.Pow(gsrAdcVal, 2)) +
+                        ((-476.9835) * Math.Pow(gsrAdcVal, 1)) + 340351.3341);
                     break;
                 case (int)Shimmer2.GsrRange.HW_RES_287K:
                     resistance = (int)(
                         ((0.000000013569627) * Math.Pow(gsrAdcVal, 4)) +
-                        ((-0.0001650399)     * Math.Pow(gsrAdcVal, 3)) +
-                        ((0.7541990)         * Math.Pow(gsrAdcVal, 2)) +
-                        ((-1572.6287856)     * Math.Pow(gsrAdcVal, 1)) + 1367507.9270);
+                        ((-0.0001650399) * Math.Pow(gsrAdcVal, 3)) +
+                        ((0.7541990) * Math.Pow(gsrAdcVal, 2)) +
+                        ((-1572.6287856) * Math.Pow(gsrAdcVal, 1)) + 1367507.9270);
                     break;
                 case (int)Shimmer2.GsrRange.HW_RES_1M:
                     resistance = (int)(
                         ((0.00000002550036498) * Math.Pow(gsrAdcVal, 4)) +
-                        ((-0.00033136)         * Math.Pow(gsrAdcVal, 3)) +
-                        ((1.6509426597)        * Math.Pow(gsrAdcVal, 2)) +
-                        ((-3833.348044)        * Math.Pow(gsrAdcVal, 1)) + 3806317.6947);
+                        ((-0.00033136) * Math.Pow(gsrAdcVal, 3)) +
+                        ((1.6509426597) * Math.Pow(gsrAdcVal, 2)) +
+                        ((-3833.348044) * Math.Pow(gsrAdcVal, 1)) + 3806317.6947);
                     break;
                 case (int)Shimmer2.GsrRange.HW_RES_3M3:
                     resistance = (int)(
                         ((0.00000037153627) * Math.Pow(gsrAdcVal, 4)) +
-                        ((-0.004239437)     * Math.Pow(gsrAdcVal, 3)) +
-                        ((17.905709)        * Math.Pow(gsrAdcVal, 2)) +
-                        ((-33723.8657)      * Math.Pow(gsrAdcVal, 1)) + 25368044.6279);
+                        ((-0.004239437) * Math.Pow(gsrAdcVal, 3)) +
+                        ((17.905709) * Math.Pow(gsrAdcVal, 2)) +
+                        ((-33723.8657) * Math.Pow(gsrAdcVal, 1)) + 25368044.6279);
                     break;
             }
             return resistance;
@@ -2634,10 +2585,10 @@ namespace ShimmerConnect
                 AM[i] = ((double)formattedPacket[6 + i]) / 100;
             }
 
-            double[,] AlignmentMatrix = new double[3,3] { { AM[0], AM[1], AM[2] }, { AM[3], AM[4], AM[5] }, { AM[6], AM[7], AM[8] } };
-            double[,] SensitivityMatrix = new double[3,3]  { { formattedPacket[3], 0, 0 }, { 0, formattedPacket[4], 0 }, { 0, 0, formattedPacket[5] } };
+            double[,] AlignmentMatrix = new double[3, 3] { { AM[0], AM[1], AM[2] }, { AM[3], AM[4], AM[5] }, { AM[6], AM[7], AM[8] } };
+            double[,] SensitivityMatrix = new double[3, 3] { { formattedPacket[3], 0, 0 }, { 0, formattedPacket[4], 0 }, { 0, 0, formattedPacket[5] } };
             double[,] OffsetVector = { { formattedPacket[0] }, { formattedPacket[1] }, { formattedPacket[2] } };
-            
+
             if (packetType == (byte)Shimmer2.PacketType.AccelCalibrationResponse && SensitivityMatrix[0, 0] != -1)
             {   //used to be 65535 but changed to -1 as we are now using i16
                 //mDefaultCalibrationParametersAccel = false;
@@ -2668,10 +2619,12 @@ namespace ShimmerConnect
                     {
                         pProfile.SensitivityMatrixAccel = Shimmer2.SensitivityMatrixAccel6gShimmer2;
                     }
-                } else {
-                        pProfile.SensitivityMatrixAccel = Shimmer3.SensitivityMatrixLowNoiseAccel2gShimmer3;
-                        pProfile.AlignmentMatrixAccel = Shimmer3.AlignmentMatrixLowNoiseAccelShimmer3;
-                        pProfile.OffsetVectorAccel = Shimmer3.OffsetVectorAccelLowNoiseShimmer3;
+                }
+                else
+                {
+                    pProfile.SensitivityMatrixAccel = Shimmer3.SensitivityMatrixLowNoiseAccel2gShimmer3;
+                    pProfile.AlignmentMatrixAccel = Shimmer3.AlignmentMatrixLowNoiseAccelShimmer3;
+                    pProfile.OffsetVectorAccel = Shimmer3.OffsetVectorAccelLowNoiseShimmer3;
                 }
             }
             else if (packetType == (byte)Shimmer3.PacketType.DAccelCalibrationResponse && SensitivityMatrix[0, 0] != -1)
@@ -2686,7 +2639,7 @@ namespace ShimmerConnect
             else if (packetType == (byte)Shimmer3.PacketType.DAccelCalibrationResponse && SensitivityMatrix[0, 0] == -1)
             {
                 pProfile.DefaultDAccelParams = true;
-                
+
                 if (pProfile.GetAccelRange() == 0)
                 {
                     pProfile.SensitivityMatrixAccel2 = Shimmer3.SensitivityMatrixWideRangeAccel2gShimmer3;
@@ -2711,7 +2664,7 @@ namespace ShimmerConnect
                     pProfile.AlignmentMatrixAccel2 = Shimmer3.AlignmentMatrixWideRangeAccelShimmer3;
                     pProfile.OffsetVectorAccel2 = Shimmer3.OffsetVectorAccelWideRangeShimmer3;
                 }
-                
+
             }
             else if (packetType == (byte)Shimmer2.PacketType.GyroCalibrationResponse && SensitivityMatrix[0, 0] != -1)
             {   //used to be 65535 but changed to -1 as we are now using i16
@@ -2719,9 +2672,9 @@ namespace ShimmerConnect
                 pProfile.AlignmentMatrixGyro = AlignmentMatrix;
                 pProfile.OffsetVectorGyro = OffsetVector;
                 pProfile.SensitivityMatrixGyro = SensitivityMatrix;
-                pProfile.SensitivityMatrixGyro[0, 0] = pProfile.SensitivityMatrixGyro[0,0] / 100;
-                pProfile.SensitivityMatrixGyro[1, 1] = pProfile.SensitivityMatrixGyro[1,1] / 100;
-                pProfile.SensitivityMatrixGyro[2, 2] = pProfile.SensitivityMatrixGyro[2,2] / 100;
+                pProfile.SensitivityMatrixGyro[0, 0] = pProfile.SensitivityMatrixGyro[0, 0] / 100;
+                pProfile.SensitivityMatrixGyro[1, 1] = pProfile.SensitivityMatrixGyro[1, 1] / 100;
+                pProfile.SensitivityMatrixGyro[2, 2] = pProfile.SensitivityMatrixGyro[2, 2] / 100;
                 pProfile.DefaultGyroParams = false;
             }
             else if (packetType == (byte)Shimmer2.PacketType.GyroCalibrationResponse && SensitivityMatrix[0, 0] == -1)
@@ -2820,7 +2773,7 @@ namespace ShimmerConnect
             {
                 enableGyroOnTheFlyCalibration = true;
                 listSizeGyroOnTheFly = bufferSize;
-                thresholdGyroOnTheFly = threshold; 
+                thresholdGyroOnTheFly = threshold;
             }
         }
 
@@ -2857,9 +2810,9 @@ namespace ShimmerConnect
                 if (timeDifference > (1 / ((clockConstant / pProfile.GetAdcSamplingRate()) - 1)) * 1000)
                 {
                     pProfile.mPacketLossCount = pProfile.mPacketLossCount + 1;
-                    long mTotalNumberofPackets = (long)((calibratedTimeStamp - pProfile.mCalTimeStart) / (1 / (clockConstant/pProfile.GetAdcSamplingRate())  * 1000));
+                    long mTotalNumberofPackets = (long)((calibratedTimeStamp - pProfile.mCalTimeStart) / (1 / (clockConstant / pProfile.GetAdcSamplingRate()) * 1000));
                     pProfile.mPacketReceptionRate = (double)((mTotalNumberofPackets - pProfile.mPacketLossCount) / (double)mTotalNumberofPackets) * 100;
-                   
+
                 }
             }
             pProfile.mLastReceivedCalibratedTimeStamp = calibratedTimeStamp;
@@ -2916,7 +2869,7 @@ namespace ShimmerConnect
                 System.Threading.Thread.Sleep(200);
                 serialPort1.Write(new byte[1] { (byte)Shimmer2.PacketType.GET_SAMPLING_RATE_COMMAND }, 0, 1);
                 System.Threading.Thread.Sleep(200);
-                serialPort1.Write(new byte[1] { (byte)Shimmer2.PacketType.GET_MAG_GAIN_COMMAND}, 0, 1);
+                serialPort1.Write(new byte[1] { (byte)Shimmer2.PacketType.GET_MAG_GAIN_COMMAND }, 0, 1);
                 System.Threading.Thread.Sleep(200);
                 if (pProfile.GetShimmerVersion() != (int)Shimmer.ShimmerVersion.SHIMMER3)
                 {
@@ -3011,7 +2964,7 @@ namespace ShimmerConnect
             serialPort1.Write(new byte[1] { (byte)Shimmer2.PacketType.GET_ALL_CALIBRATION_COMMAND }, 0, 1);
             System.Threading.Thread.Sleep(200);
 
-            serialPort1.Write(new byte[1] { (byte)Shimmer3.PacketType.GET_BMP180_CALIBRATION_COEFFICIENTS_COMMAND}, 0, 1);
+            serialPort1.Write(new byte[1] { (byte)Shimmer3.PacketType.GET_BMP180_CALIBRATION_COEFFICIENTS_COMMAND }, 0, 1);
             System.Threading.Thread.Sleep(200);
 
 
@@ -3028,17 +2981,17 @@ namespace ShimmerConnect
         MySqlConnection conn = null;
         MySqlDataReader rdr = null;
 
-        public void populateDatabase() {
-            
+        /*
+         * This method is called after the user clicks on 'start streaming'. The method will populate the database
+         * with the information inserted by the user in the GUI.
+         * 
+         */ 
 
-            /*MySqlConnection conn = null;
-            MySqlDataReader rdr = null;*/
 
+        public void populateDatabase()
+        {            
             try
-            {
-                //conn = new MySqlConnection(cs);
-                //conn.Open();
-
+            {                
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
 
@@ -3062,17 +3015,13 @@ namespace ShimmerConnect
 
                 //Populate patientAccess information into the database
                 //get patient ID
-                String getPatientIDStm = @"SELECT id from patient where firstName='" + patientFirstNameTextbox.Text + "' and lastName='" + patientLastNameTextbox.Text + "';" ;
-                cmd = new MySqlCommand(getPatientIDStm, conn);
-                //rdr = cmd.ExecuteReader();
+                String getPatientIDStm = @"SELECT id from patient where firstName='" + patientFirstNameTextbox.Text + "' and lastName='" + patientLastNameTextbox.Text + "';";
+                cmd = new MySqlCommand(getPatientIDStm, conn);                
                 object obj = cmd.ExecuteScalar();
                 if (obj != null && obj != DBNull.Value)
                 {
                     patientID = Convert.ToString(obj);
                 }
-                Console.WriteLine("imprimindo patientID: " + patientID);
-                //String patientID = rdr.GetString(0);
-
                 //get user ID
                 String getUserIDStm = @"SELECT id from user where firstName='" + userFirstNameTextbox.Text + "' and lastName='" + userLastNameTextbox.Text + "';";
                 cmd = new MySqlCommand(getUserIDStm, conn);
@@ -3081,10 +3030,7 @@ namespace ShimmerConnect
                 {
                     userID = Convert.ToString(obj);
                 }
-                //Console.WriteLine("imprimindo userID: " + userID);
-                /*rdr = cmd.ExecuteReader();
-                String userID = rdr.GetString(0);*/
-
+               
                 //Populate patientAccess table
                 cmd = new MySqlCommand();
                 cmd.Connection = conn;
@@ -3111,8 +3057,6 @@ namespace ShimmerConnect
                 cmd.Parameters.AddWithValue("@patientId", patientID);
                 cmd.Parameters.AddWithValue("@deviceLocation", deviceLocationTextbox.Text);
                 cmd.ExecuteNonQuery();
-               
-               
             }
             catch (MySqlException ex)
             {
@@ -3124,20 +3068,19 @@ namespace ShimmerConnect
                 if (rdr != null)
                 {
                     rdr.Close();
-                }
-                /*if (conn != null)
-                {
-                    conn.Close();
-                }*/
+                }                
             }
         }
 
         DateTime currentDateTime = new DateTime();
-                  
 
+        /*
+         * Not used anymore. Still here if I wanna use it in the future.
+         * 
+         */ 
         public Boolean verifiyTimeStamp()
         {
-            
+
 
             //MySqlConnection conn = null;
             try
@@ -3179,7 +3122,8 @@ namespace ShimmerConnect
                         return true;
                 }
                 //On the first run, obj is null and we must allow the saving
-                else {
+                else
+                {
                     return true;
                 }
             }
@@ -3210,13 +3154,19 @@ namespace ShimmerConnect
             }*/
             return false;
 
-            
+
         }
+
+
+        /*
+         * Not used anymore. RAW sensor data is not being saved to the database.
+         * 
+         */ 
 
 
         public void saveRAWSensorDataIntoDatabase(String lowNoiseAccXRaw, String lowNoiseAccYRaw, String lowNoiseAccZRaw)
         {
-            
+
 
             MySqlConnection conn = null;
 
@@ -3250,7 +3200,7 @@ namespace ShimmerConnect
                 lowNoiseAccYRaw = "";
                 lowNoiseAccZRaw = "";*/
 
-              
+
             }
             catch (MySqlException ex)
             {
@@ -3266,25 +3216,23 @@ namespace ShimmerConnect
             }
         }
 
+        /*
+         * Receive the information about the AccX,Y,Z and save it into the sensors table
+         * 
+         */ 
+
         public void saveCALSensorDataIntoDatabase(String lowNoiseAccXCAL, String lowNoiseAccYCAL, String lowNoiseAccZCAL)
         {
-            
-
-            //MySqlConnection conn = null;
-
             try
             {
-                //DateTime time = DateTime.Now;
                 string format = "yyyy-MM-dd hh:mm:ss";
                 string timeperiodformat = "tt";
-                //conn = new MySqlConnection(cs);
-                //conn.Open();
-
+                
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
-
+                
                 cmd.CommandText = "INSERT INTO sensors(accelerometer_x_CAL, accelerometer_y_CAL, accelerometer_z_CAL, timestamp, timeperiod, patientID ) VALUES(@accelerometer_x_CAL, @accelerometer_y_CAL, @accelerometer_z_CAL, @timestamp, @timeperiod, @patientID )";
-
+                //Saves the acc data along with the currentDate time, time period (AM/PM) and patient id
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@accelerometer_x_CAL", lowNoiseAccXCAL);
                 cmd.Parameters.AddWithValue("@accelerometer_y_CAL", lowNoiseAccYCAL);
@@ -3295,16 +3243,6 @@ namespace ShimmerConnect
 
                 cmd.ExecuteNonQuery();
                 numberOfDatabaseSaves++;
-                //Console.WriteLine(numberOfDatabaseSaves);
-
-                //Console.WriteLine();
-                //Console.WriteLine("TimeStamp salvo: " + time.ToString(format));
-                /*//reset the variables
-                lowNoiseAccXRaw = "";
-                lowNoiseAccYRaw = "";
-                lowNoiseAccZRaw = "";*/
-
-
             }
             catch (MySqlException ex)
             {
@@ -3320,28 +3258,22 @@ namespace ShimmerConnect
             }
         }
 
-       public  String calcCurrentActivity() {
-            
-            //MySqlConnection conn = null;
-            //MySqlDataReader rdr = null;
-
+        public String calcCurrentActivity()
+        {
             try
-            {
-                //conn = new MySqlConnection(cs);
-                //conn.Open();
-
+            {                
                 MySqlCommand cmd = new MySqlCommand();
                 cmd.Connection = conn;
                 String getLastAccXValuesStm = @"SELECT accelerometer_x_CAL from sensors ORDER BY id DESC LIMIT 2;";
                 cmd = new MySqlCommand(getLastAccXValuesStm, conn);
 
+                //Makes a query to get the last two values from the accx table.
                 rdr = cmd.ExecuteReader();
                 double[] values = new double[2];
-                int  i=0;
+                int i = 0;
                 while (rdr.Read())
                 {
                     values[i] = rdr.GetDouble(0);
-                    //Console.WriteLine(rdr.GetDouble(0));
                     i++;
                 }
 
@@ -3350,16 +3282,8 @@ namespace ShimmerConnect
                     rdr.Close();
                 }
 
-                //Console.WriteLine("last Value: " + values[0]);
-                //Console.WriteLine("penultimo Value: " + values[1]);
-
-                //calc Std Deviation
-                double stdDeviation = calcStandardDeviation(values);
-                //Console.WriteLine("stddeviation: " + stdDeviation);
-                /*if (stdDeviation < 0.1)
-                    currentActivity = "inactive";
-                else
-                    currentActivity = "active";*/
+                //calc Std Deviation for the last two values of the accx table
+                double stdDeviation = calcStandardDeviation(values);                
                 if (stdDeviation <= 0.1)
                     currentActivity = "inactive";
                 else if (stdDeviation > 0.1 && stdDeviation <= 0.5)
@@ -3370,9 +3294,9 @@ namespace ShimmerConnect
                     currentActivity = "high activity";
 
                 //Show in screen
+                
                 activityTextBox.Text = currentActivity;
-                //Console.WriteLine(currentActivity);
-               
+
                 /*
                 //populate DB
                 //Populate activity table
@@ -3431,11 +3355,9 @@ namespace ShimmerConnect
                 cmd.Parameters.AddWithValue("@startTime", startTime);
                 cmd.Parameters.AddWithValue("@endTime", endTime);
                 cmd.Parameters.AddWithValue("@datasetId", datasetId);
-
-
+                
                 cmd.ExecuteNonQuery();
-
-
+                
             }
             catch (MySqlException ex)
             {
@@ -3456,12 +3378,12 @@ namespace ShimmerConnect
             return currentActivity;
         }
 
-       public static double calcStandardDeviation(IEnumerable<double> values)
-       {
-           double avg = values.Average();
-           return Math.Sqrt(values.Average(v => Math.Pow(v - avg, 2)));
-       }
-        
+        public static double calcStandardDeviation(IEnumerable<double> values)
+        {
+            double avg = values.Average();
+            return Math.Sqrt(values.Average(v => Math.Pow(v - avg, 2)));
+        }
+
 
         private void label2_Click(object sender, EventArgs e)
         {
@@ -3525,7 +3447,7 @@ namespace ShimmerConnect
 
         private void textBox1_TextChanged_1(object sender, EventArgs e)
         {
-           
+
         }
 
         private void label9_Click(object sender, EventArgs e)
@@ -3539,10 +3461,10 @@ namespace ShimmerConnect
         }
 
 
-        
+
 
     }
 
-    
+
 
 }
