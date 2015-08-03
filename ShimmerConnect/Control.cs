@@ -3258,7 +3258,7 @@ namespace ShimmerConnect
             }
         }
 
-        public String calcCurrentActivity()
+        public String calcCurrentActivity() 
         {
             try
             {                
@@ -3294,8 +3294,8 @@ namespace ShimmerConnect
                     currentActivity = "high activity";
 
                 //Show in screen
-                
-                activityTextBox.Text = currentActivity;
+                //2.0 change. Activity is not shown in the back end anymore.
+                //activityTextBox.Text = currentActivity;
 
                 /*
                 //populate DB
