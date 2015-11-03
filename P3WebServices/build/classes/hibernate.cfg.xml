@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+"-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.bytecode.use_reflection_optimizer">false</property>
+        <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+        <property name="hibernate.connection.password">887cac00</property>
+        <property name="hibernate.connection.url">jdbc:mysql://us-cdbr-azure-west-c.cloudapp.net:3306/projectwebservices</property>
+        <property name="hibernate.connection.username">bcfe38148e2425</property>
+        <property name="hibernate.current_session_context_class">thread</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <property name="hibernate.search.autoregister_listeners">false</property>
+        <property name="hibernate.validator.apply_to_ddl">false</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
+        <mapping class="edu.luc.webservices.model.Order"/>
+        <mapping class="edu.luc.webservices.model.PartnerComments" />
+        <mapping class="edu.luc.webservices.model.ProductImages" />
+        <mapping class="edu.luc.webservices.model.Customer" />
+        <mapping class="edu.luc.webservices.model.CustomerPayment" />
+        <mapping class="edu.luc.webservices.model.ProductCategory" />
+        <mapping class="edu.luc.webservices.model.Product" />
+        <mapping class="edu.luc.webservices.model.ProductComments" />
+        <mapping class="edu.luc.webservices.model.Partner" />
+    </session-factory>
+</hibernate-configuration>

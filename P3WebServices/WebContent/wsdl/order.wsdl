@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="OrderService" targetNamespace="http://model.webservices.luc.edu/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://model.webservices.luc.edu/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+  <wsdl:types>
+    <schema xmlns="http://www.w3.org/2001/XMLSchema">
+  <import namespace="http://model.webservices.luc.edu/" schemaLocation="order_schema1.xsd"/>
+</schema>
+  </wsdl:types>
+  <wsdl:message name="setOrderFinalPriceResponse">
+    <wsdl:part name="parameters" element="tns:setOrderFinalPriceResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderStatusResponse">
+    <wsdl:part name="parameters" element="tns:setOrderStatusResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderDate">
+    <wsdl:part name="parameters" element="tns:setOrderDate">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderStatus">
+    <wsdl:part name="parameters" element="tns:setOrderStatus">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setCustomerResponse">
+    <wsdl:part name="parameters" element="tns:setCustomerResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderStatusResponse">
+    <wsdl:part name="parameters" element="tns:getOrderStatusResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderShippingMethod">
+    <wsdl:part name="parameters" element="tns:setOrderShippingMethod">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderShippingMethodResponse">
+    <wsdl:part name="parameters" element="tns:getOrderShippingMethodResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setCustomerPaymentResponse">
+    <wsdl:part name="parameters" element="tns:setCustomerPaymentResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getCustomer">
+    <wsdl:part name="parameters" element="tns:getCustomer">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getCustomerPayment">
+    <wsdl:part name="parameters" element="tns:getCustomerPayment">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderEstimateDeliveryResponse">
+    <wsdl:part name="parameters" element="tns:setOrderEstimateDeliveryResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderDate">
+    <wsdl:part name="parameters" element="tns:getOrderDate">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setProductsResponse">
+    <wsdl:part name="parameters" element="tns:setProductsResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getCustomerPaymentResponse">
+    <wsdl:part name="parameters" element="tns:getCustomerPaymentResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderEstimateDelivery">
+    <wsdl:part name="parameters" element="tns:setOrderEstimateDelivery">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getProducts">
+    <wsdl:part name="parameters" element="tns:getProducts">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderDateResponse">
+    <wsdl:part name="parameters" element="tns:setOrderDateResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderFinalPrice">
+    <wsdl:part name="parameters" element="tns:setOrderFinalPrice">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setProducts">
+    <wsdl:part name="parameters" element="tns:setProducts">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderFinalPrice">
+    <wsdl:part name="parameters" element="tns:getOrderFinalPrice">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setCustomer">
+    <wsdl:part name="parameters" element="tns:setCustomer">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderShippingMethod">
+    <wsdl:part name="parameters" element="tns:getOrderShippingMethod">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderStatus">
+    <wsdl:part name="parameters" element="tns:getOrderStatus">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setCustomerPayment">
+    <wsdl:part name="parameters" element="tns:setCustomerPayment">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderIdResponse">
+    <wsdl:part name="parameters" element="tns:getOrderIdResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderIdResponse">
+    <wsdl:part name="parameters" element="tns:setOrderIdResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderId">
+    <wsdl:part name="parameters" element="tns:setOrderId">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderDateResponse">
+    <wsdl:part name="parameters" element="tns:getOrderDateResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderId">
+    <wsdl:part name="parameters" element="tns:getOrderId">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getProductsResponse">
+    <wsdl:part name="parameters" element="tns:getProductsResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderEstimateDeliveryResponse">
+    <wsdl:part name="parameters" element="tns:getOrderEstimateDeliveryResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderEstimateDelivery">
+    <wsdl:part name="parameters" element="tns:getOrderEstimateDelivery">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getOrderFinalPriceResponse">
+    <wsdl:part name="parameters" element="tns:getOrderFinalPriceResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="setOrderShippingMethodResponse">
+    <wsdl:part name="parameters" element="tns:setOrderShippingMethodResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="getCustomerResponse">
+    <wsdl:part name="parameters" element="tns:getCustomerResponse">
+    </wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="OrderSEI">
+    <wsdl:operation name="getProducts">
+      <wsdl:input name="getProducts" message="tns:getProducts">
+    </wsdl:input>
+      <wsdl:output name="getProductsResponse" message="tns:getProductsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderDate">
+      <wsdl:input name="setOrderDate" message="tns:setOrderDate">
+    </wsdl:input>
+      <wsdl:output name="setOrderDateResponse" message="tns:setOrderDateResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderFinalPrice">
+      <wsdl:input name="setOrderFinalPrice" message="tns:setOrderFinalPrice">
+    </wsdl:input>
+      <wsdl:output name="setOrderFinalPriceResponse" message="tns:setOrderFinalPriceResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setProducts">
+      <wsdl:input name="setProducts" message="tns:setProducts">
+    </wsdl:input>
+      <wsdl:output name="setProductsResponse" message="tns:setProductsResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderFinalPrice">
+      <wsdl:input name="getOrderFinalPrice" message="tns:getOrderFinalPrice">
+    </wsdl:input>
+      <wsdl:output name="getOrderFinalPriceResponse" message="tns:getOrderFinalPriceResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderStatus">
+      <wsdl:input name="setOrderStatus" message="tns:setOrderStatus">
+    </wsdl:input>
+      <wsdl:output name="setOrderStatusResponse" message="tns:setOrderStatusResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setCustomer">
+      <wsdl:input name="setCustomer" message="tns:setCustomer">
+    </wsdl:input>
+      <wsdl:output name="setCustomerResponse" message="tns:setCustomerResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderShippingMethod">
+      <wsdl:input name="getOrderShippingMethod" message="tns:getOrderShippingMethod">
+    </wsdl:input>
+      <wsdl:output name="getOrderShippingMethodResponse" message="tns:getOrderShippingMethodResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderStatus">
+      <wsdl:input name="getOrderStatus" message="tns:getOrderStatus">
+    </wsdl:input>
+      <wsdl:output name="getOrderStatusResponse" message="tns:getOrderStatusResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setCustomerPayment">
+      <wsdl:input name="setCustomerPayment" message="tns:setCustomerPayment">
+    </wsdl:input>
+      <wsdl:output name="setCustomerPaymentResponse" message="tns:setCustomerPaymentResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderId">
+      <wsdl:input name="setOrderId" message="tns:setOrderId">
+    </wsdl:input>
+      <wsdl:output name="setOrderIdResponse" message="tns:setOrderIdResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderShippingMethod">
+      <wsdl:input name="setOrderShippingMethod" message="tns:setOrderShippingMethod">
+    </wsdl:input>
+      <wsdl:output name="setOrderShippingMethodResponse" message="tns:setOrderShippingMethodResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCustomer">
+      <wsdl:input name="getCustomer" message="tns:getCustomer">
+    </wsdl:input>
+      <wsdl:output name="getCustomerResponse" message="tns:getCustomerResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCustomerPayment">
+      <wsdl:input name="getCustomerPayment" message="tns:getCustomerPayment">
+    </wsdl:input>
+      <wsdl:output name="getCustomerPaymentResponse" message="tns:getCustomerPaymentResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderDate">
+      <wsdl:input name="getOrderDate" message="tns:getOrderDate">
+    </wsdl:input>
+      <wsdl:output name="getOrderDateResponse" message="tns:getOrderDateResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderId">
+      <wsdl:input name="getOrderId" message="tns:getOrderId">
+    </wsdl:input>
+      <wsdl:output name="getOrderIdResponse" message="tns:getOrderIdResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderEstimateDelivery">
+      <wsdl:input name="setOrderEstimateDelivery" message="tns:setOrderEstimateDelivery">
+    </wsdl:input>
+      <wsdl:output name="setOrderEstimateDeliveryResponse" message="tns:setOrderEstimateDeliveryResponse">
+    </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderEstimateDelivery">
+      <wsdl:input name="getOrderEstimateDelivery" message="tns:getOrderEstimateDelivery">
+    </wsdl:input>
+      <wsdl:output name="getOrderEstimateDeliveryResponse" message="tns:getOrderEstimateDeliveryResponse">
+    </wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="OrderServiceSoapBinding" type="tns:OrderSEI">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getProducts">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getProducts">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getProductsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderDate">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setOrderDate">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setOrderDateResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderFinalPrice">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setOrderFinalPrice">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setOrderFinalPriceResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setProducts">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setProducts">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setProductsResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderFinalPrice">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getOrderFinalPrice">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getOrderFinalPriceResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderStatus">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setOrderStatus">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setOrderStatusResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setCustomer">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setCustomer">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setCustomerResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderShippingMethod">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getOrderShippingMethod">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getOrderShippingMethodResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderStatus">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getOrderStatus">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getOrderStatusResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setCustomerPayment">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setCustomerPayment">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setCustomerPaymentResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderId">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setOrderId">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setOrderIdResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderShippingMethod">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setOrderShippingMethod">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setOrderShippingMethodResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCustomer">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getCustomer">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getCustomerResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getCustomerPayment">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getCustomerPayment">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getCustomerPaymentResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderDate">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getOrderDate">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getOrderDateResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderId">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getOrderId">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getOrderIdResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setOrderEstimateDelivery">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="setOrderEstimateDelivery">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="setOrderEstimateDeliveryResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="getOrderEstimateDelivery">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="getOrderEstimateDelivery">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="getOrderEstimateDeliveryResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="OrderService">
+    <wsdl:port name="OrderPort" binding="tns:OrderServiceSoapBinding">
+      <soap:address location="http://localhost:8080/P3WebServices/services/OrderPort"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

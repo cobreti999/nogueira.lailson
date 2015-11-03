@@ -1,0 +1,12 @@
+C:\Users\lailson\git\ShimmerConnect\bin\Debug\ShimmerConnect.exe.config
+C:\Users\lailson\git\ShimmerConnect\bin\Debug\ShimmerConnect.exe
+C:\Users\lailson\git\ShimmerConnect\bin\Debug\ShimmerConnect.pdb
+C:\Users\lailson\git\ShimmerConnect\obj\Debug\ShimmerConnect.csprojResolveAssemblyReference.cache
+C:\Users\lailson\git\ShimmerConnect\obj\Debug\ShimmerConnect.Configure.resources
+C:\Users\lailson\git\ShimmerConnect\obj\Debug\ShimmerConnect.Control.resources
+C:\Users\lailson\git\ShimmerConnect\obj\Debug\ShimmerConnect.MainForm.resources
+C:\Users\lailson\git\ShimmerConnect\obj\Debug\ShimmerConnect.GraphForm.resources
+C:\Users\lailson\git\ShimmerConnect\obj\Debug\ShimmerConnect.Properties.Resources.resources
+C:\Users\lailson\git\ShimmerConnect\obj\Debug\ShimmerConnect.csproj.GenerateResource.Cache
+C:\Users\lailson\git\ShimmerConnect\obj\Debug\ShimmerConnect.exe
+C:\Users\lailson\git\ShimmerConnect\obj\Debug\ShimmerConnect.pdb
