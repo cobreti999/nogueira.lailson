@@ -1,8 +1,7 @@
 package edu.luc.webservices.dao;
 
 import edu.luc.webservices.helpers.TestHelper;
-import edu.luc.webservices.model.Customer;
-import edu.luc.webservices.model.Product;
+import edu.luc.webservices.model.Partner;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,32 +15,31 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
-public class CustomerDAO {
-	public static Customer findByName(String name) {
-		String query = "SELECT * FROM customer where customer_name = '" + name + "' ORDER BY Customer_ID DESC LIMIT 1;";
+public class PartnerDAO {
+	public static Partner findByName(String name) {
+		String query = "SELECT * FROM partner where partner_name = '" + name + "' ORDER BY Partner_ID DESC LIMIT 1;";
 		try {
 			ResultSet rs = TestHelper.makeQuery(query);
-			String customerName = "";
-			String customerAddress = "";
-			int customerZipCode = 0;
-			String customerCity = "";
-			String customerCountry = "";
-			int customerCellPhone = 0;
+			String partnerName = "";
+			String partnerAddress = "";
+			String partnerZipCode = "";
+			String partnerCity = "";
+			String partnerCountry = "";
+			String partnerCellPhone = "";
 
 			while (rs.next()){
-				customerName =  rs.getString("Customer_Name");
-				customerAddress = rs.getString("Customer_Address");
-				customerZipCode = rs.getInt("Customer_Zipcode");
-				customerCity = rs.getString("Customer_City");
-				customerCountry = rs.getString("Customer_Country");
-				customerCellPhone = rs.getInt("Customer_Cellphone");
+				partnerName =  rs.getString("Partner_Name");
+				partnerAddress = rs.getString("Partner_Address");
+				partnerZipCode = rs.getString("Partner_Zipcode");
+				partnerCity = rs.getString("Partner_City");
+				partnerCountry = rs.getString("Partner_Country");
+				partnerCellPhone = rs.getString("Partner_Cellphone");
 			}
-			Customer customer = new Customer(customerName, customerAddress, customerZipCode, customerCity, customerCountry, customerCellPhone);
-			
+			Partner partner = new Partner(partnerName, partnerAddress, partnerZipCode, partnerCity, partnerCountry, partnerCellPhone);
 			rs.close();
 			TestHelper.stmt.close();
 			TestHelper.conn.close();
-			return customer;
+			return partner;
 
 		} catch(SQLException se){
 			//Handle errors for JDBC
@@ -53,14 +51,14 @@ public class CustomerDAO {
 		return null;
 	}
 	
-	public static List<Customer> findAllCustomers() {
+	public static List<Partner> findAllPartners() {
 		try {
 			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 			Session session = factory.getCurrentSession();
 			session.beginTransaction();
-			String queryString = "select * from Customer";
+			String queryString = "select * from Partner";
 			Query query = session.createQuery(queryString);
-			List<Customer> results = query.list();
+			List<Partner> results = query.list();
 			return results;
 		} catch (NoResultException e) {
 			return Collections.emptyList();
@@ -68,7 +66,7 @@ public class CustomerDAO {
 	}	
 
 	public static boolean validateUserAuthentication(String name, String password) {
-		String query = "SELECT * FROM customer where customer_name = '" + name + "' AND customer_credentials = '" + password + "' ORDER BY Customer_ID DESC LIMIT 1;";
+		String query = "SELECT * FROM partner where partner_name = '" + name + "' AND partner_credentials = '" + password + "' ORDER BY Partner_ID DESC LIMIT 1;";
 		ResultSet rs = TestHelper.makeQuery(query);
 		if (rs == null)
 			return false;

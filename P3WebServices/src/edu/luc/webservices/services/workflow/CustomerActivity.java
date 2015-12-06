@@ -1,6 +1,8 @@
 package edu.luc.webservices.services.workflow;
 import edu.luc.webservices.model.Customer;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -12,6 +14,10 @@ public class CustomerActivity {
 
 	public Customer findCustomerByName(String name) {
 		return CustomerDAO.findByName(name);
+	}
+	
+	public List<Customer> findAllCustomers() {
+		return CustomerDAO.findAllCustomers();
 	}
 
 	public Customer create(Customer customer) throws InvalidAddressException {

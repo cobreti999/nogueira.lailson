@@ -5,7 +5,7 @@
 	<import resource="classpath:META-INF/cxf/cxf.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" />
 	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
-	<jaxws:endpoint xmlns:tns="http://model.webservices.luc.edu/"
+	<jaxws:endpoint  xmlns:tns="http://model.webservices.luc.edu/"
 		id="order" implementor="edu.luc.webservices.model.Order" wsdlLocation="wsdl/order.wsdl"
 		endpointName="tns:OrderPort" serviceName="tns:OrderService" address="/OrderPort">
 		<jaxws:features>

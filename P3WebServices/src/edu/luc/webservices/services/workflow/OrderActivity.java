@@ -3,10 +3,15 @@
  */
 package edu.luc.webservices.services.workflow;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import edu.luc.webservices.dao.OrderDAO;   
+
+import edu.luc.webservices.dao.CustomerDAO;
+import edu.luc.webservices.dao.OrderDAO;
+import edu.luc.webservices.model.Customer;
 import edu.luc.webservices.model.Order;
 import edu.luc.webservices.services.exception.OrderNotFoundException;
 
@@ -59,6 +64,10 @@ public class OrderActivity {
 		}else{
 			return order;
 		}
+	}
+	
+	public List<Order> findAllOrders() {
+		return OrderDAO.findAllOrders();
 	}
 
 }

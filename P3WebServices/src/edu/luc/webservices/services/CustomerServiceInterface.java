@@ -12,5 +12,7 @@ public interface CustomerServiceInterface extends Serializable {
 	public Response create(Customer customer);
 
 	public Response update(Customer customer);
+	
+	public Response findAllCustomers();
 
 }

@@ -1,6 +1,8 @@
 package edu.luc.webservices.services.resource;
 
 import java.net.URI;
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -11,6 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import edu.luc.webservices.model.Customer;
 import edu.luc.webservices.model.Order;
 import edu.luc.webservices.services.OrderServiceInterface;
 import edu.luc.webservices.services.exception.OrderNotFoundException;
@@ -96,6 +99,18 @@ public class OrderResource implements OrderServiceInterface {
 		} catch (OrderNotFoundException e) {
 			response = Response.status(Status.NOT_FOUND).build();
 		}
+		return response;
+	}
+	
+	@GET
+	@Path("/findAllOrders")
+	@Produces({ "application/json" })
+	public Response findAllOrders() {
+		List<Order> orders = null;
+		Response response = null;
+		orders = orderActivity.findAllOrders();
+		if (null != orders)
+			response = Response.ok().entity(orders).build();
 		return response;
 	}
 

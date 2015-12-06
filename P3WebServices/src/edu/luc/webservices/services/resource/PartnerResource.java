@@ -16,33 +16,33 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import edu.luc.webservices.model.Customer;
-import edu.luc.webservices.services.CustomerServiceInterface;
+import edu.luc.webservices.model.Partner;
+import edu.luc.webservices.services.PartnerServiceInterface;
 import edu.luc.webservices.services.exception.InvalidAddressException;
-import edu.luc.webservices.services.workflow.CustomerActivity;
+import edu.luc.webservices.services.workflow.PartnerActivity;
 
 
 
-@Path("/customers")
-public class CustomerResource implements CustomerServiceInterface {
+@Path("/partners")
+public class PartnerResource implements PartnerServiceInterface {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private CustomerActivity customerActivity = new CustomerActivity();
+	private PartnerActivity partnerActivity = new PartnerActivity();
 
 	@GET
 	@Path("/{login}")
 	@Produces({ "application/json" })
 	public Response findByName(@PathParam("login") String name) {
-		Customer customer = null;
+		Partner partner = null;
 		Response response = null;
 
 		if (null != name) {
-			customer = customerActivity.findCustomerByName(name);
-			if (null != customer)
-				response = Response.ok().entity(customer).build();
+			partner = partnerActivity.findPartnerByName(name);
+			if (null != partner)
+				response = Response.ok().entity(partner).build();
 		} else {
 			response = Response.status(Status.BAD_REQUEST).build();
 		}
@@ -50,27 +50,27 @@ public class CustomerResource implements CustomerServiceInterface {
 	}
 	
 	@GET
-	@Path("/findAllCustomers")
+	@Path("/findAllPartners")
 	@Produces({ "application/json" })
-	public Response findAllCustomers() {
-		List<Customer> customers = null;
+	public Response findAllPartners() {
+		List<Partner> partners = null;
 		Response response = null;
-		customers = customerActivity.findAllCustomers();
-		if (null != customers)
-			response = Response.ok().entity(customers).build();
+		partners = partnerActivity.findAllPartners();
+		if (null != partners)
+			response = Response.ok().entity(partners).build();
 		return response;
 	}
 
 	@POST
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
-	public Response create(Customer customer) {
+	public Response create(Partner partner) {
 		Response response = null;
 		try {
-			customer = customerActivity.create(customer);
+			partner = partnerActivity.create(partner);
 			response = Response
-					.created(URI.create("/customers/" + customer.getCustomerName()))
-					.entity(customer).build();
+					.created(URI.create("/partners/" + partner.getPartnerName()))
+					.entity(partner).build();
 		} catch (InvalidAddressException e) {
 			response = Response.status(Status.BAD_REQUEST).build();
 		} catch (Exception e) {
@@ -81,14 +81,14 @@ public class CustomerResource implements CustomerServiceInterface {
 	}
 
 	@PUT
-	@Path("/{customerId}")
+	@Path("/{partnerId}")
 	@Consumes({ "application/json" })
 	@Produces({ "application/json" })
-	public Response update(Customer customer) {
+	public Response update(Partner partner) {
 		Response response = null;
 		try {
-			customer = customerActivity.update(customer);
-			response = Response.ok().entity(customer).build();
+			partner = partnerActivity.update(partner);
+			response = Response.ok().entity(partner).build();
 		} catch (InvalidAddressException e) {
 			response = Response.status(Status.BAD_REQUEST).build();
 		} catch (Exception e) {

@@ -2,7 +2,16 @@ package edu.luc.webservices.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+
+import javax.persistence.NoResultException;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
 import edu.luc.webservices.helpers.TestHelper;
 import edu.luc.webservices.model.Customer;
@@ -80,4 +89,18 @@ public class OrderDAO {
 		}
 		return null;
 	}
+	
+	public static List<Order> findAllOrders() {
+		try {
+			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+			Session session = factory.getCurrentSession();
+			session.beginTransaction();
+			String queryString = "select * from Customer";
+			Query query = session.createQuery(queryString);
+			List<Order> results = query.list();
+			return results;
+		} catch (NoResultException e) {
+			return Collections.emptyList();
+		}
+	}	
 }
