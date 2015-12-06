@@ -19,7 +19,7 @@ public class ProductDAO {
 			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 			Session session = factory.getCurrentSession();
 			session.beginTransaction();
-			String queryString = "select * from Product where product_name = " + title;
+			String queryString = "from Product where product_name = " + title;
 			Query query = session.createQuery(queryString);
 			List<Product> results = query.list();
 			return results;
@@ -33,7 +33,7 @@ public class ProductDAO {
 			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 			Session session = factory.getCurrentSession();
 			session.beginTransaction();
-			String queryString = "select * from Product where Partner_Partner_ID = " + id;
+			String queryString = "from Product where Partner_Partner_ID = " + id;
 			Query query = session.createQuery(queryString);
 			List<Product> results = query.list();
 			return results;
@@ -47,7 +47,7 @@ public class ProductDAO {
 			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 			Session session = factory.getCurrentSession();
 			session.beginTransaction();
-			String queryString = "select * from Product where Product_Price = " + price;
+			String queryString = "from Product where Product_Price = " + price;
 			Query query = session.createQuery(queryString);
 			List<Product> results = query.list();
 			return results;
@@ -61,7 +61,7 @@ public class ProductDAO {
 			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 			Session session = factory.getCurrentSession();
 			session.beginTransaction();
-			String queryString = "select * from Product where Product_ID = " + id;
+			String queryString = "from Product where Product_ID = " + id;
 			Query query = session.createQuery(queryString);
 			List products = query.list();
 			return (Product) products.get(0);
@@ -75,7 +75,7 @@ public class ProductDAO {
 			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 			Session session = factory.getCurrentSession();
 			session.beginTransaction();
-			String queryString = "select * from Product";
+			String queryString = "from Product";
 			Query query = session.createQuery(queryString);
 			List<Product> results = query.list();
 			return results;

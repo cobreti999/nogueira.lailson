@@ -9,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
@@ -16,6 +17,11 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.Test;
 
+import edu.luc.webservices.dao.CustomerDAO;
+import edu.luc.webservices.dao.CustomerPaymentDAO;
+import edu.luc.webservices.dao.OrderDAO;
+import edu.luc.webservices.dao.PartnerDAO;
+import edu.luc.webservices.dao.ProductDAO;
 import edu.luc.webservices.helpers.TestHelper;
 import edu.luc.webservices.model.Customer;
 import edu.luc.webservices.model.CustomerPayment;
@@ -306,5 +312,37 @@ public class TestClass {
 		String actualValue5 = orderStatus;
 		String failureDetails5 = "ER5: The order status is different than expected. Expected Value: " + expectedValue5 + ". Actual Value: " + actualValue5;
 		assertTrue(failureDetails5, actualValue5.equals(expectedValue5));
+	}
+	
+	public static void main(String args[]){
+		//CustomerDAO.findByName("Lailson");
+		//CustomerDAO.findAllCustomers();
+		/*List<CustomerPayment> payments = new CustomerPaymentDAO().findAllPayments();
+		for (int i = 0; i < payments.size(); i++) {
+			System.out.println(payments.get(i));
+		}*/
+		//CustomerPayment c = new CustomerPaymentDAO().findPaymentByCustomerId((short)1);
+		//CustomerPayment c = new CustomerPaymentDAO().findCustomerPaymentByCustomerName("Lailson");
+		//CustomerPayment c = new CustomerPaymentDAO().findPaymentByCustomerId((short)1);
+
+		/*List<Order> payments = new OrderDAO().findAllOrders();
+		for (int i = 0; i < payments.size(); i++) {
+			System.out.println(payments.get(i));
+		}*/
+		//Order o = new OrderDAO().findOrderById((short)1, "Lailson");
+		/*Order o = new OrderDAO().findOrderByCustomerName("Lailson");
+		System.out.println(o.getOrderId());
+		
+		Partner p = new PartnerDAO().findByName("Amazon");
+		System.out.println(p.getPartnerName());*/
+		
+		//Product pr = new ProductDAO().findById((short)1);
+		//System.out.println(pr.getProductName());
+
+		List<Product> payments = new ProductDAO().searchByPartnerId("1");
+		for (int i = 0; i < payments.size(); i++) {
+			System.out.println(payments.get(i));
+		}
+		
 	}
 }
