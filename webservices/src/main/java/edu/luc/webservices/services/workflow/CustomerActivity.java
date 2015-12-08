@@ -35,10 +35,9 @@ public class CustomerActivity {
 			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 			Session session = factory.getCurrentSession();
 			session.beginTransaction();
-			if (customer.getCustomerId() != null) {
-				session.saveOrUpdate(customer);
-				session.getTransaction().commit();
-			} 
+			System.out.println("customer: " + customer.getCustomerName() + ". Id: " + customer.getCustomerId());
+			session.saveOrUpdate(customer);
+			session.getTransaction().commit();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

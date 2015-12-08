@@ -26,14 +26,24 @@ public class OrderDAO {
 			session.beginTransaction();
 			String queryString = "FROM Customer where customerName = '" + customerName + "'";
 			Query query = session.createQuery(queryString);
-			Customer c = (Customer) query.list().get(0);
-			int customerId = c.getCustomerId();
-			queryString = "from Order where Customer_FK = '" + customerId + "'";
-			query = session.createQuery(queryString);
-			return (Order) query.list().get(0);
+			List<Customer> results = query.list();
+			System.out.println("test 1");
+			if (results.size() > 0){
+				Customer c = (Customer) results.get(0);
+				System.out.println("test 2: " + c.getCustomerName());
+				int customerId = c.getCustomerId();
+				queryString = "from Order where Customer_FK = '" + customerId + "'";
+				query = session.createQuery(queryString);
+				List<Order> order = query.list();
+				if (order.size() > 0 ){
+					System.out.println("test 3: " + order.get(0));
+					return order.get(0);
+				}
+			}
 		} catch (NoResultException e) {
 			return (Order) Collections.emptyList();
 		}
+		return null;
 	}
 	
 	public static Order findOrderById(Short orderID, String customerName){

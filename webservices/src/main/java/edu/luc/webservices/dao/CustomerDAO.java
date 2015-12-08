@@ -20,10 +20,16 @@ public class CustomerDAO {
 			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 			Session session = factory.getCurrentSession();
 			session.beginTransaction();
-			String queryString = "FROM Customer where customer_name = '" + name + "' ORDER BY Customer_ID" ;
+			String queryString = "FROM Customer where customer_name = '" + name + "'" ;
 			Query query = session.createQuery(queryString);
 			List<Customer> results = query.list();
-			return results.get(0);
+			if (results.size() > 0){
+				Customer c = results.get(0);
+				return c;
+			}
+			else{
+				return null;
+			}
 		} catch (NoResultException e) {
 			return (Customer) Collections.emptyList();
 		}

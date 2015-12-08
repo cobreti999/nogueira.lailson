@@ -59,6 +59,7 @@ public class OrderActivity {
 	public Order findOrderByCustomerLogin(String customerName)
 			throws OrderNotFoundException {
 		Order order = OrderDAO.findOrderByCustomerName(customerName);
+		System.out.println(order);
 		if (order == null){
 			throw new OrderNotFoundException();
 		}else{

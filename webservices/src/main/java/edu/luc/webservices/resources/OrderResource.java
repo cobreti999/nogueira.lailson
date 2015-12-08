@@ -95,6 +95,7 @@ public class OrderResource implements OrderServiceInterface {
 		Order order = null;
 		try {
 			order = orderActivity.findOrderByCustomerLogin(login);
+			System.out.println(order);
 			response = Response.ok().entity(order).build();
 		} catch (OrderNotFoundException e) {
 			response = Response.status(Status.NOT_FOUND).build();
