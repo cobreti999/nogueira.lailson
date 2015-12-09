@@ -19,10 +19,13 @@ import edu.luc.webservices.model.CustomerPayment;
 import edu.luc.webservices.model.Order;
 
 public class OrderDAO {
+	public static SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+	public static Session session = factory.getCurrentSession();
+	
 	public static Order findOrderByCustomerName(String customerName) {
+		SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+		Session session = factory.getCurrentSession();
 		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
 			session.beginTransaction();
 			String queryString = "FROM Customer where customerName = '" + customerName + "'";
 			Query query = session.createQuery(queryString);
@@ -39,17 +42,24 @@ public class OrderDAO {
 					System.out.println("test 3: " + order.get(0));
 					return order.get(0);
 				}
+				session.getTransaction().commit();
+				session.close();
 			}
+			session.getTransaction().commit();
+			session.close();
 		} catch (NoResultException e) {
 			return (Order) Collections.emptyList();
+		}
+		finally{
+			session.close();
 		}
 		return null;
 	}
 	
 	public static Order findOrderById(Short orderID, String customerName){
 		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
+			//SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+			//Session session = factory.getCurrentSession();
 			session.beginTransaction();
 			String queryString = "select customer from Order where Order_Id = '" + orderID + "'";
 			Query query = session.createQuery(queryString);
@@ -64,16 +74,10 @@ public class OrderDAO {
 	}
 	
 	public static List<Order> findAllOrders() {
-		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
-			session.beginTransaction();
-			String queryString = "from Order";
-			Query query = session.createQuery(queryString);
-			List<Order> results = query.list();
-			return results;
-		} catch (NoResultException e) {
-			return Collections.emptyList();
-		}
+		session.beginTransaction();
+		String queryString = "from Order";
+		Query query = session.createQuery(queryString);
+		List<Order> results = query.list();
+		return results;
 	}	
 }

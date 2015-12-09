@@ -2,6 +2,7 @@ package edu.luc.webservices.dao;
 
 import edu.luc.webservices.helpers.TestHelper;
 import edu.luc.webservices.model.Customer;
+import edu.luc.webservices.services.workflow.Link;
 
 import java.sql.ResultSet;
 import java.util.Collections;
@@ -15,10 +16,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 
 public class CustomerDAO {
+	
+	public static SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+	public static Session session = factory.getCurrentSession();
+	
 	public static Customer findByName(String name) {
 		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
 			session.beginTransaction();
 			String queryString = "FROM Customer where customer_name = '" + name + "'" ;
 			Query query = session.createQuery(queryString);
@@ -37,8 +40,6 @@ public class CustomerDAO {
 	
 	public static List<Customer> findAllCustomers() {
 		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
 			session.beginTransaction();
 			String queryString = "from Customer";
 			Query query = session.createQuery(queryString);

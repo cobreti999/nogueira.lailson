@@ -13,11 +13,19 @@ import edu.luc.webservices.services.exception.InvalidAddressException;
 public class CustomerActivity {
 
 	public Customer findCustomerByName(String name) {
-		return CustomerDAO.findByName(name);
+		CustomerDAO.session = CustomerDAO.factory.getCurrentSession();
+		Customer customer = CustomerDAO.findByName(name);
+		setLinks(customer, "get");
+		return customer;
 	}
 	
 	public List<Customer> findAllCustomers() {
-		return CustomerDAO.findAllCustomers();
+		CustomerDAO.session = CustomerDAO.factory.getCurrentSession();
+		List<Customer> customers = CustomerDAO.findAllCustomers();
+		for (int i=0; i < customers.size(); i++){
+			setLinks(customers.get(i), "get");
+		}
+		return customers;
 	}
 
 	public Customer create(Customer customer) throws InvalidAddressException {
@@ -35,9 +43,9 @@ public class CustomerActivity {
 			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 			Session session = factory.getCurrentSession();
 			session.beginTransaction();
-			System.out.println("customer: " + customer.getCustomerName() + ". Id: " + customer.getCustomerId());
 			session.saveOrUpdate(customer);
 			session.getTransaction().commit();
+			setLinks(customer, "create");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -53,6 +61,16 @@ public class CustomerActivity {
 	public boolean validateUserAuth(Customer customer) {
 		return CustomerDAO.validateUserAuthentication(customer.getCustomerName(),
 				customer.getCustomerCredentials().toString());
+	}
+	
+	public void closeConnection(){
+		CustomerDAO.session.close();
+	}
+	
+	private void setLinks(Customer customer, String action) {
+		Link link = new Link(action, 
+			"http://localhost:8080/webservices/webapi/customers/" + customer.getCustomerId());	
+		customer.setLinks(link);
 	}
 
 }

@@ -13,6 +13,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -32,34 +33,43 @@ public class PartnerResource implements PartnerServiceInterface {
 	private static final long serialVersionUID = 1L;
 	private PartnerActivity partnerActivity = new PartnerActivity();
 
+	
 	@GET
 	@Path("/{login}")
-	@Produces({ "application/json" })
-	public Response findByName(@PathParam("login") String name) {
-		Partner partner = null;
-		Response response = null;
-
-		if (null != name) {
-			partner = partnerActivity.findPartnerByName(name);
-			if (null != partner)
-				response = Response.ok().entity(partner).build();
-		} else {
-			response = Response.status(Status.BAD_REQUEST).build();
+	@Produces(MediaType.TEXT_HTML)
+	public String findByName(@PathParam("login") String name) {
+		String ret;
+		Partner c = partnerActivity.findPartnerByName(name);
+		if (c != null){
+			ret = c.toString();
+		}else{
+			ret = "failed to find partner with name: " + name;
 		}
-		return response;
+		partnerActivity.closeConnection();
+		return ret;
 	}
 	
 	@GET
 	@Path("/findAllPartners")
-	@Produces({ "application/json" })
-	public Response findAllPartners() {
-		List<Partner> partners = null;
-		Response response = null;
-		partners = partnerActivity.findAllPartners();
-		if (null != partners)
-			response = Response.ok().entity(partners).build();
-		return response;
+	@Produces(MediaType.TEXT_HTML)
+	public String findAllPartners() {
+		String partnerString= "";
+		List<Partner> partners = partnerActivity.findAllPartners();
+		
+		if (partners == null){
+			partnerString = "There are no partners registered";
+		}else if (partners.size() == 0){
+			partnerString = "There are no partners registered";
+		}else{
+			for (int i = 0; i < partners.size(); i++) {
+				partnerString  = partnerString + partners.get(i);
+				partnerString += "<br>";
+			}
+		}
+		partnerActivity.closeConnection();
+		return partnerString;
 	}
+	
 
 	@POST
 	@Consumes({ "application/json" })

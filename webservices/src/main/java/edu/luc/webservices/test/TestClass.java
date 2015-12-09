@@ -38,7 +38,7 @@ public class TestClass {
 		SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 		Session session = factory.getCurrentSession();
 		session.beginTransaction();
-		Customer testCustomer = new Customer("Lailson","6437 North Glenwood Avenue", 60626, "Chicago", "USA", 312478050);
+		Customer testCustomer = new Customer("Emilio1","6437 North Glenwood Avenue", 60626, "Chicago", "USA", 312478050);
 		session.save(testCustomer);
 		session.getTransaction().commit();
 		
@@ -243,11 +243,11 @@ public class TestClass {
 		SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
 		Session session = factory.getCurrentSession();
 		session.beginTransaction();
-		Customer customer = new Customer("Lailson11","6437 North Glenwood Avenue", 60626, "Chicago", "USA", 312478050);
+		Customer customer = new Customer("Emilio2","6437 North Glenwood Avenue", 60626, "Chicago", "USA", 312478050);
 		CustomerPayment payment = new CustomerPayment(customer, "Debit Card - 1234 5678 1919 2020", "6437 North Glenwood Avenue");
 		Partner partner = new Partner("BestBuy", "1234 North Michigan Avenue", "12345", "Seatle", "USA", "3124780500");
-		ProductCategory productCategory = new ProductCategory("TV");
-		Product product = new Product(partner, productCategory, "TV Samsung", "2000");
+		ProductCategory productCategory = new ProductCategory("Videogame");
+		Product product = new Product(partner, productCategory, "Playstation4", "2000");
 		Set<Product> products = new HashSet<Product>(0);
 		products.add(product);
 		

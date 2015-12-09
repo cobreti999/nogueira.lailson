@@ -6,66 +6,67 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-
+import javax.ws.rs.core.MediaType;
 import edu.luc.webservices.model.CustomerPayment;
-import edu.luc.webservices.model.Order;
 import edu.luc.webservices.services.PaymentServiceInterface;
 import edu.luc.webservices.services.workflow.PaymentActivity;
 
-
+@Path("/payments")
 public class PaymentResource implements PaymentServiceInterface{
 	private PaymentActivity paymentActivity = new PaymentActivity();
 
 	@GET
-	@Path("{id}")
-	@Produces({ "application/json" })
-	public Response findPaymentByOrderId(@PathParam("id") Short id) {
-		Response response = null;
-		if (null != id) {
-			CustomerPayment payment = paymentActivity.findPaymentByOrderId(id);
-			if (null != payment) {
-				response = Response.ok(payment).build();
-			} else {
-				response = Response.status(Status.NOT_FOUND).build();
-			}
-		} else {
-			response = Response.status(Status.BAD_REQUEST).build();
-		}
-		return response;
+	@Path("/{id}")
+	@Produces(MediaType.TEXT_HTML)
+	public String findPaymentByOrderId(@PathParam("id") Short id) {
+		CustomerPayment p;
+		String ret ="";
+		p = paymentActivity.findPaymentByOrderId(id);
+		if (p != null){
+			ret = p.toString();
+		}else{
+			ret = "failed to find payment for order with id: " + id;
+		}	
+		paymentActivity.closeConnection();
+		return ret;
 	}
-
+	
 	@GET
-	@Produces({ "application/json" })
 	@Path("/customers/{customerId}")
-	public Response findPaymentByCustomerId(
+	@Produces(MediaType.TEXT_HTML)
+	public String findPaymentByCustomerId(
 			@PathParam("customerId") Short customerId) {
-		Response response = null;
-		if (null != customerId) {
-			CustomerPayment payment = paymentActivity
-					.findPaymentByCustomerId(customerId);
-			if (null != payment) {
-				response = Response.ok(payment).build();
-			} else {
-				response = Response.status(Status.NOT_FOUND).build();
-			}
-		} else {
-			response = Response.status(Status.BAD_REQUEST).build();
-		}
-		return response;
+		CustomerPayment p;
+		String ret ="";
+		p = paymentActivity.findPaymentByCustomerId(customerId);
+		if (p != null){
+			ret = p.toString();
+		}else{
+			ret = "failed to find payment for order with id: " + customerId;
+		}	
+		paymentActivity.closeConnection();
+		return ret;
 	}
 	
 	@GET
 	@Path("/findAllPayments")
-	@Produces({ "application/json" })
-	public Response findAllPayments() {
-		List<CustomerPayment> payments = null;
-		Response response = null;
-		payments = paymentActivity.findAllPayments();
-		if (null != payments)
-			response = Response.ok().entity(payments).build();
-		return response;
+	@Produces(MediaType.TEXT_HTML)
+	public String findAllPayments() {
+		String paymentString= "";
+		List<CustomerPayment> payments = paymentActivity.findAllPayments();
+		
+		if (payments == null){
+			paymentString = "There are no payments registered";
+		}else if (payments.size() == 0){
+			paymentString = "There are no payments registered";
+		}else{
+			for (int i = 0; i < payments.size(); i++) {
+				paymentString  = paymentString + payments.get(i);
+				paymentString += "<br>";
+			}
+		}
+		paymentActivity.closeConnection();
+		return paymentString;
 	}
+	
 }

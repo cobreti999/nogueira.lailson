@@ -14,10 +14,14 @@ import edu.luc.webservices.model.Customer;
 import edu.luc.webservices.model.Product;
 
 public class ProductDAO {
+	
+	public static SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+	public static Session session = factory.getCurrentSession();
+	
 	public List<Product> searchByTitle(String title) {
 		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
+			//SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+			//Session session = factory.getCurrentSession();
 			session.beginTransaction();
 			String queryString = "from Product where product_name = " + title;
 			Query query = session.createQuery(queryString);
@@ -30,8 +34,8 @@ public class ProductDAO {
 
 	public List<Product> searchByPartnerId(String id) {
 		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
+			//SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+			//Session session = factory.getCurrentSession();
 			session.beginTransaction();
 			String queryString = "from Product where Partner_Partner_ID = " + id;
 			Query query = session.createQuery(queryString);
@@ -44,8 +48,8 @@ public class ProductDAO {
 
 	public List<Product> searchByPrice(String price) {
 		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
+			//SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+			//Session session = factory.getCurrentSession();
 			session.beginTransaction();
 			String queryString = "from Product where Product_Price = " + price;
 			Query query = session.createQuery(queryString);
@@ -58,8 +62,8 @@ public class ProductDAO {
 	
 	public Product findById(Short id) {
 		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
+			//SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+			//Session session = factory.getCurrentSession();
 			session.beginTransaction();
 			String queryString = "from Product where Product_ID = " + id;
 			Query query = session.createQuery(queryString);
@@ -72,8 +76,8 @@ public class ProductDAO {
 	
 	public List<Product> findAllProducts() {
 		try {
-			SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
-			Session session = factory.getCurrentSession();
+			//SessionFactory factory = new Configuration().configure("hibernate.cfg.xml").buildSessionFactory(); 
+			//Session session = factory.getCurrentSession();
 			session.beginTransaction();
 			String queryString = "from Product";
 			Query query = session.createQuery(queryString);

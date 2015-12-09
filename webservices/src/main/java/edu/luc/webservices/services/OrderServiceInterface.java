@@ -13,7 +13,7 @@ public interface OrderServiceInterface extends Serializable{
 
 	public Response checkOrderStatus(Short orderId, String customerName);
 
-	public Response findOrderByCustomerLogin(String login);
+	public String findOrderByCustomerLogin(String login);
 	
-	public Response findAllOrders();
+	public String findAllOrders();
 }
